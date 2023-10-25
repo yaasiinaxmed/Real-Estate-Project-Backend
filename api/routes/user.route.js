@@ -1,10 +1,12 @@
 import express from 'express'
 import { login, signup, user, userDelete, userUpdate, users } from '../controllers/user.controller.js'
 import verifyToken from '../middleware/verifyToken.js'
+import validateUser from '../middleware/validateUser.js'
 
 const router = express.Router()
 
-router.post("/signup", signup)
+// router endpoints
+router.post("/signup", validateUser, signup)
 router.post("/login", login)
 router.get("/users", users)
 router.get("/user", verifyToken, user)
