@@ -1,4 +1,6 @@
+import { request } from "express"
 import propertyModel from "../models/property.model.js"
+import requestModel from "../models/request.model.js"
 
 // create property - POST
 export const createProperty = async (req, res) => {
@@ -101,6 +103,69 @@ export const deleteProperty = async (req, res) => {
         }
 
         res.status(200).json({status: 200, message: "Property deleted successfully"})
+
+    } catch (error) {
+        res.status(500).json({status: 500, message: "Internal Server Error", error: error.message})
+    }
+}
+
+// Send Request - POST
+export const sendRequest = async (req, res) => {
+    try {
+
+        const id = req.params.id
+        const senderId = req.user.id
+
+        const property = await propertyModel.findById(id)
+
+        if(!property) {
+            return res.status(404).json({status: 404, message: "Property not found"})
+        }
+
+        const existingRequest = await requestModel.findOne({requestId: property._id, senderId});
+
+        if (existingRequest) {
+          return res.status(400).json({ status: 400, message: 'Request has already been sent' });
+        }    
+
+        const newRequest = await requestModel.create({
+            title: property.title,
+            description: property.description,
+            price: property.price,
+            bedrooms: property.bedrooms,
+            bathrooms: property.bathrooms,
+            location: property.location,
+            propertyType: property.propertyType,
+            type: property.type,
+            userId: property.userId,
+            senderId,
+            requestId: property._id
+        })
+
+        if(!newRequest) {
+            return res.status(400).json({status: 400, message: "Request was not sended!"})
+        }
+
+        await newRequest.save()
+
+        res.status(200).json({status: 200, message: "Request was sending successfully"})
+        
+    } catch (error) {
+        res.status(500).json({status: 500, message: "Internal Server Error", error: error.message})
+    }
+}
+
+// Get Requests - GET
+export const getRequests = async (req, res) => {
+    try {
+        
+        const requests = await requestModel.find()
+
+        if(requests.length === 0) {
+            return res.status(404).json({status: 404, message: "Requests not found"})
+        }
+
+        res.status(200).json(requests)
 
     } catch (error) {
         res.status(500).json({status: 500, message: "Internal Server Error", error: error.message})
