@@ -1,6 +1,7 @@
 import { request } from "express"
 import propertyModel from "../models/property.model.js"
 import requestModel from "../models/request.model.js"
+import transactionModel from "../models/transactions.model.js"
 
 // create property - POST
 export const createProperty = async (req, res) => {
@@ -125,7 +126,7 @@ export const sendRequest = async (req, res) => {
         const existingRequest = await requestModel.findOne({requestId: property._id, senderId});
 
         if (existingRequest) {
-          return res.status(400).json({ status: 400, message: 'Request has already been sent' });
+          return res.status(400).json({ status: 409, message: 'Request has already been sent' });
         }    
 
         const newRequest = await requestModel.create({
@@ -166,6 +167,71 @@ export const getRequests = async (req, res) => {
         }
 
         res.status(200).json(requests)
+
+    } catch (error) {
+        res.status(500).json({status: 500, message: "Internal Server Error", error: error.message})
+    }
+}
+
+// Approve to requests - POST
+export const approveToRequest = async (req, res) => {
+    try {
+        
+        const id = req.params.id
+
+        const request = await requestModel.findById(id)
+
+        if(!request) {
+            return res.status(404).json({status: 404, message: "Requests not found"})
+        }
+
+        const existingTransaction = await transactionModel.findOne({approveId: request._id, userId: request.userId})
+
+        if(existingTransaction) {
+            return res.status(409).json({status: 409, message: "The request has already been approved!"})
+        }
+
+        console.log("request:", existingTransaction)
+
+
+        const newTransaction = new transactionModel({
+            title: request.title,
+            description: request.description,
+            price: request.price,
+            bedrooms: request.bedrooms,
+            bathrooms: request.bathrooms,
+            location: request.location,
+            propertyType: request.propertyType,
+            type: request.type,
+            userId: request.userId,
+            senderId: request.senderId,
+            approveId: request._id
+        })
+
+        if(!newTransaction) {
+            return res.status(400).json({status: 400, message: "Request was not approved!"})
+        }
+
+        await newTransaction.save()
+
+        res.status(200).json({status: 200, message: "The request has been successfully approved "})
+
+    } catch (error) {
+        res.status(500).json({status: 500, message: "Internal Server Error", error: error.message})
+    }
+}
+
+// Get Transactions - GET
+export const getTransactions = async (req, res) => {
+    try {
+        
+        const transactions = await transactionModel.find()
+
+        if(transactions.length === 0) {
+            return res.status(404).json({status: 404, message: "Requests not found"})
+        }
+
+        res.status(200).json(transactions)
 
     } catch (error) {
         res.status(500).json({status: 500, message: "Internal Server Error", error: error.message})

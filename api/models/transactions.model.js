@@ -41,7 +41,7 @@ const transactionSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    requestId: {
+    approveId: {
         type: String,
         required: true
     }
