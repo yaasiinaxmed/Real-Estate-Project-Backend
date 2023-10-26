@@ -6,7 +6,7 @@ const port = "3000"
 server.use(express.static('public'));
 
 server.get('/', (req, res) => {
-  res.sendFile('index.html');
+  res.sendFile('index.html', { root: process.cwd() });
 });
 
 server.listen(port, () => console.log(`Server is running at ${port}`))
