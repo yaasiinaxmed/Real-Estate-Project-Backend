@@ -5,6 +5,7 @@ import validateProperty from '../middleware/ValidateProperty.js'
 
 const router = express.Router()
 
+// router endpoints
 router.post("/create", verifyToken, validateProperty ,createProperty)
 router.get("/", getProperties)
 router.put("/update/:id", verifyToken, validateProperty, updateProperty)
