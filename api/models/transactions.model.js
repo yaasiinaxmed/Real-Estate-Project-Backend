@@ -33,7 +33,7 @@ const transactionSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    userId: {
+    ownerId: {
         type: String,
         required: true
     },

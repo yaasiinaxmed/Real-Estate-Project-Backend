@@ -5,7 +5,7 @@ import transactionModel from "../models/transactions.model.js";
 // create property - POST
 export const createProperty = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const ownerId = req.user.id;
     const {
       title,
       description,
@@ -26,7 +26,7 @@ export const createProperty = async (req, res) => {
       location,
       propertyType,
       type,
-      userId,
+      ownerId,
     });
 
     if (!newProperty) {
@@ -80,7 +80,7 @@ export const getProperties = async (req, res) => {
 export const updateProperty = async (req, res) => {
   try {
     const id = req.params.id;
-    const userId = req.user.id;
+    const ownerId = req.user.id;
 
     const {
       title,
@@ -104,7 +104,7 @@ export const updateProperty = async (req, res) => {
         location,
         propertyType,
         type,
-        userId,
+        ownerId,
       }
     );
 
@@ -169,7 +169,7 @@ export const sendRequest = async (req, res) => {
         .json({ status: 404, message: "Property not found" });
     }
 
-    if (property.userId === senderId) {
+    if (property.ownerId === senderId) {
       return res
         .status(400)
         .json({ status: 400, message: "Request was not sended!" });
@@ -195,7 +195,7 @@ export const sendRequest = async (req, res) => {
       location: property.location,
       propertyType: property.propertyType,
       type: property.type,
-      userId: property.userId,
+      ownerId: property.ownerId,
       senderId,
       requestId: property._id,
     });
@@ -258,20 +258,6 @@ export const approveToRequest = async (req, res) => {
         .json({ status: 404, message: "Requests not found" });
     }
 
-    const existingTransaction = await transactionModel.findOne({
-      approveId: request._id,
-      userId: request.userId,
-    });
-
-    if (existingTransaction) {
-      return res
-        .status(409)
-        .json({
-          status: 409,
-          message: "The request has already been approved!",
-        });
-    }
-
     const newTransaction = new transactionModel({
       title: request.title,
       description: request.description,
@@ -281,7 +267,7 @@ export const approveToRequest = async (req, res) => {
       location: request.location,
       propertyType: request.propertyType,
       type: request.type,
-      userId: request.userId,
+      ownerId: request.ownerId,
       senderId: request.senderId,
       approveId: request._id,
     });
@@ -293,6 +279,8 @@ export const approveToRequest = async (req, res) => {
     }
 
     await newTransaction.save();
+
+    await requestModel.findByIdAndDelete(id)
 
     res
       .status(200)
@@ -333,4 +321,3 @@ export const getTransactions = async (req, res) => {
       });
   }
 };
-
