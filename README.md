@@ -114,6 +114,7 @@ This endpoint allows an existing user to update their information in the databas
 
 | Parameter  | Type     | Required    | Description |
 |------------| -------- | ------------|-------------|
+| id   | String | Yes      | The ID of the user. |
 | Name      | String   | No         | The Name of the user |
 | Email      | String   | No         | The email of the user |
 
@@ -131,7 +132,9 @@ If the user is not updated, it will return a JSON response with the status code 
 #### Endpoint: `/api/users/delete/:id`
 This endpoint allows an existing user to delete their account from the database using the user model. It does not require any parameters in the request body or query.
 
-The endpoint requires the `user id` as a parameter in the request URL.
+| Parameter       | Type    | Required | Description                              |
+| --------------- | ------- | -------- | ---------------------------------------- |
+| id   | String | Yes      | the ID of the user. |
 
 The endpoint will delete the user from the database by id using the user model. If the user is deleted successfully, it will return a JSON response with the status code `200` and a message 
 
@@ -217,8 +220,7 @@ This endpoint allows an authenticated user to update their property in the datab
 | location      | String   | No         |  The location of the property.|
 | propertyType      | String   | No         |   The type of the property, such as apartment, house, villa, etc.|
 | type      | String   | No         |  The type of the transaction, such as rent or sale. |
-
-The endpoint also requires the `property id` as a parameter in the request URL and the user id as an owner id from the JWT token in the request header.
+| id   | String | Yes      | ID of the property. |
 
 The endpoint will update the property in the database by id using the property model with the provided parameters and the owner id. If the property is updated successfully, it will return a JSON response with the status code `200` and a message:
 
@@ -232,9 +234,11 @@ If the property is not updated, it will return a JSON response with the status c
 
 ### Delete Property - DELETE
 #### Endpoint: `/api/properties/delete/:id`
-This endpoint allows an authenticated user to delete their property from the database using the property model. It does not require any parameters in the request body or query.
+This endpoint allows an authenticated user to delete their property from the database using the property model.
 
-The endpoint requires the `property id` as a parameter in the request URL and the user id as an owner id from the JWT token in the request header.
+| Parameter       | Type    | Required | Description                              |
+| --------------- | ------- | -------- | ---------------------------------------- |
+| ID   | String | Yes      | ID of the property. |
 
 The endpoint will delete the property from the database by id using the property model. If the property is deleted successfully, it will return a JSON response with the status code `200` and a message:
 
@@ -262,7 +266,7 @@ This endpoint allows a logged in user to send a request to another user for thei
 
 | Parameter       | Type    | Required | Description                              |
 | --------------- | ------- | -------- | ---------------------------------------- |
-| id   | integer | Yes      | ID of the property to send the request for. |
+| id   | String | Yes      | ID of the property to send the request for. |
 
 #### Response
 
