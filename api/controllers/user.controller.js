@@ -108,16 +108,13 @@ export const userUpdate = async (req, res) => {
     try {
 
         const id = req.params.id
-        const {name, email, password} = req.body
-
-        const hashedPassword = await bcrypt.hash(password, 10)
+        const {name, email} = req.body
         
         const updatedUser = await userModel.findByIdAndUpdate(
             {_id: id},
             {
                 name: name,
                 email: email,
-                password: hashedPassword
             }
         )
 
