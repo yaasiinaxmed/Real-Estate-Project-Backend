@@ -9,7 +9,7 @@ const verifyToken = async (req, res, next) => {
     const token = req.headers.authorization
 
     if(!token) {
-        return res.status(401).json({status: 401, message: "You are not authenticated!" })
+        return res.status(401).json({status: 401, message: "Authentication required" })
     }
 
     // console.log("token",token)
@@ -18,7 +18,7 @@ const verifyToken = async (req, res, next) => {
 
     jwt.verify(tokenWithoutBearer, SECRET_KEY, (error, decode) => {
         if(error) {
-            return res.status(401).jsonL({status: 401, message: "Token is not valid!"})
+            return res.status(401).jsonL({status: 401, message: "Invalid token"})
         }
 
         req.user = decode

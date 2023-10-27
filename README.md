@@ -238,7 +238,7 @@ This endpoint allows an authenticated user to delete their property from the dat
 
 | Parameter       | Type    | Required | Description                              |
 | --------------- | ------- | -------- | ---------------------------------------- |
-| ID   | String | Yes      | ID of the property. |
+| ID   | String | Yes      | The ID of the property. |
 
 The endpoint will delete the property from the database by id using the property model. If the property is deleted successfully, it will return a JSON response with the status code `200` and a message:
 
@@ -276,21 +276,105 @@ This endpoint allows a logged in user to send a request to another user for thei
   "message": "Request sent successfully"
 }
 ```
-<!-- ### Get Requests - GET
+### Get Requests - GET
 #### Endpoint: `/api/properties/requests`
-This endpoint allows a logged in user to send a request to another user for their property in the real estate marketplace.
+The endpoint returns a list of all requests submitted by renters and buyers in the database
+
+#### Response
+
+```json
+[
+  {
+    "_id": "60f9a3c8a9d2f31a4c8b4567",
+    "title": "Spacious apartment in downtown",
+    "description": "A beautiful and modern apartment with 3 bedrooms and 2 bathrooms, located in the heart of the city. Close to public transportation, shops, restaurants, and parks.",
+    "price": 1500,
+    "bedrooms": 3,
+    "bathrooms": 2,
+    "location": "New York, NY",
+    "propertyType": "Apartment",
+    "type": "for rent",
+    "ownerId": "60f9a3c8a9d2f31a4c8b4568",
+    "senderId": "60f9a3c8a9d2f31a4c8b4569"
+  },
+  {
+    "_id": "60f9a3c8a9d2f31a4c8b4570",
+    "title": "Cozy house with a garden",
+    "description": "A charming and cozy house with 2 bedrooms and 1 bathroom, located in a quiet and green neighborhood. The house has a large garden with a patio and a barbecue area.",
+    "price": 250000,
+    "bedrooms": 2,
+    "bathrooms": 1,
+    "location": "Los Angeles, CA",
+    "propertyType": "House",
+    "type": "for sell",
+    "ownerId": "60f9a3c8a9d2f31a4c8b4571",
+    "senderId": "60f9a3c8a9d2f31a4c8b4572"
+  }
+]
+```
+If there are no requests found, it will return a JSON response with the status code `404` and a message `Requests not found`
+
+### Approve to requests - POST
+#### Endpoint: `/api/properties/requests/:id/approve`
+This endpoint approves a request with a given ID and creates a new transaction for it. A transaction is a record of a completed deal between owners and renters for a property.
 
 #### Request Parameters
 
 | Parameter       | Type    | Required | Description                              |
 | --------------- | ------- | -------- | ---------------------------------------- |
-| id   | integer | Yes      | ID of the property to send the request for. |
+| id   | String | Yes      | The ID of the request to be approved. |
 
 #### Response
 
 ```json
 {
   "status" : 200,
-  "message": "Request sent successfully"
+  "message": "The request has been successfully approved"
 }
-``` -->
+```
+### Get Transactions - GET
+#### Endpoint: `/api/properties/transactions`
+This endpoint returns a list of all transactions in the database,
+A transaction is a record of a completed deal between owners and renters for a property.
+
+#### Response
+
+```json
+[
+  {
+    "_id": "60f9a3c8a9d2f31a4c8b4573",
+    "title": "Spacious apartment in downtown",
+    "description": "A beautiful and modern apartment with 3 bedrooms and 2 bathrooms, located in the heart of the city. Close to public transportation, shops, restaurants, and parks.",
+    "price": 1500,
+    "bedrooms": 3,
+    "bathrooms": 2,
+    "location": "New York, NY",
+    "propertyType": "Apartment",
+    "type": "Rent",
+    "ownerId": "60f9a3c8a9d2f31a4c8b4568",
+    "senderId": "60f9a3c8a9d2f31a4c8b4569",
+    "approveId": "60f9a3c8a9d2f31a4c8b4567"
+  },
+  {
+    "_id": "60f9a3c8a9d2f31a4c8b4574",
+    "title": "Cozy house with a garden",
+    "description": "A charming and cozy house with 2 bedrooms and 1 bathroom, located in a quiet and green neighborhood. The house has a large garden with a patio and a barbecue area.",
+    "price": 250000,
+    "bedrooms": 2,
+    "bathrooms": 1,
+    "location": "Los Angeles, CA",
+    "propertyType": "House",
+    "type": "Buy",
+    "ownerId": "60f9a3c8a9d2f31a4c8b4571",
+    "senderId": "60f9a3c8a9d2f31a4c8b4572",
+    "approveId": "60f9a3c8a9d2f31a4c8b4570"
+  }
+]
+```
+
+### Possible error messages:
+- `Authentication required`: The request requires authentication, but the user is not authenticated.
+- `Invalid token`: The provided token is invalid or expired.
+- `Request already sent for this property`: The authenticated user has already sent a request to move into the requested property.
+- `Request was not sended!`: The request not sending or The owner of the property is the same as the person who is sending the request.
+- `Internal Server Error`: An internal server error occurred.

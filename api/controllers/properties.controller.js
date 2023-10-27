@@ -183,7 +183,7 @@ export const sendRequest = async (req, res) => {
     if (existingRequest) {
       return res
         .status(400)
-        .json({ status: 409, message: "Request has already been sent" });
+        .json({ status: 409, message: "Request has already been sent this property" });
     }
 
     const newRequest = await requestModel.create({
