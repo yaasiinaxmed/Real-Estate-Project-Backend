@@ -272,7 +272,7 @@ This endpoint allows a logged in user to send a request to another user for thei
   "message": "Request sent successfully"
 }
 ```
-### Get Requests - GET
+<!-- ### Get Requests - GET
 #### Endpoint: `/api/properties/requests`
 This endpoint allows a logged in user to send a request to another user for their property in the real estate marketplace.
 
@@ -289,4 +289,4 @@ This endpoint allows a logged in user to send a request to another user for thei
   "status" : 200,
   "message": "Request sent successfully"
 }
-```
+``` -->
