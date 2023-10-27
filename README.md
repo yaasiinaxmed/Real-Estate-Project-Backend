@@ -149,9 +149,9 @@ The endpoint accepts the following query parameters:
 | Query Parameter  | Type     | Required    | Description |
 |------------| -------- | ------------|-------------|
 | title      | String   | No         | The title of the property. |
-| price      | String   | No         | The price of the property. |
-| bedrooms      | String   | No         |  The number of bedrooms in the property.|
-| bathrooms      | String   | No         |  The number of bathrooms in the property.|
+| price      | Number   | No         | The price of the property. |
+| bedrooms      | Number   | No         |  The number of bedrooms in the property.|
+| bathrooms      | Number   | No         |  The number of bathrooms in the property.|
 | location      | String   | No         |  The location of the property.|
 | propertyType      | String   | No         |   The type of the property, such as apartment, house, villa, etc.|
 | type      | String   | No         |  The type of the transaction, such as rent or sale. |
@@ -176,3 +176,80 @@ The endpoint will find all the properties in the database that match the query p
 ]
 ```
 If there are no properties found, it will return a JSON response with the status code `404` and a message `Properties not found`
+
+### Create Property
+#### Endpoint: `POST /api/properties/create`
+This endpoint allows an authenticated user to create a new property in the real estate marketplace. It requires the following parameters in the request body:
+
+| Parameter  | Type     | Required    | Description |
+|------------| -------- | ------------|-------------|
+| title      | String   | Yes         | The title of the property. |
+| description      | String   | Yes         | The description  of the property. |
+| price      | Number   | Yes         | The price of the property. |
+| bedrooms      | Number   | Yes         |  The number of bedrooms in the property.|
+| bathrooms      | Number   | Yes         |  The number of bathrooms in the property.|
+| location      | String   | Yes         |  The location of the property.|
+| propertyType      | String   | Yes         |   The type of the property, such as apartment, house, villa, etc.|
+| type      | String   | Yes         |  The type of the transaction, such as rent or sale. |
+
+The endpoint will create a new property in the database using the property model with the provided parameters and the owner id. If the property is created successfully, it will return a JSON response with the status code `200` and a message:
+
+``` json
+{
+  "status": 200,
+  "message": "Property created successfully",
+}
+```
+If the property is not created, it will return a JSON response with the status code `400` and a message `Property was not created`
+
+### Update Property
+#### Endpoint: `PUT /api/properties/update/:id`
+This endpoint allows an authenticated user to update their property in the database using the property model. It requires the following parameters in the request body:
+
+| Parameter  | Type     | Required    | Description |
+|------------| -------- | ------------|-------------|
+| title      | String   | No         | The title of the property. |
+| description      | String   | No         | The description  of the property. |
+| price      | Number   | No         | The price of the property. |
+| bedrooms      | Number   | No         |  The number of bedrooms in the property.|
+| bathrooms      | Number   | No         |  The number of bathrooms in the property.|
+| location      | String   | No         |  The location of the property.|
+| propertyType      | String   | No         |   The type of the property, such as apartment, house, villa, etc.|
+| type      | String   | No         |  The type of the transaction, such as rent or sale. |
+
+The endpoint also requires the `property id` as a parameter in the request URL and the user id as an owner id from the JWT token in the request header.
+
+The endpoint will update the property in the database by id using the property model with the provided parameters and the owner id. If the property is updated successfully, it will return a JSON response with the status code `200` and a message:
+
+``` json
+{
+  "status": 200,
+  "message": "Property updated  successfully",
+}
+```
+If the property is not updated, it will return a JSON response with the status code `400` and a message `Property was not updated!`
+
+### Delete Property
+#### Endpoint: `DELETE /api/properties/delete/:id`
+This endpoint allows an authenticated user to delete their property from the database using the property model. It does not require any parameters in the request body or query.
+
+The endpoint requires the `property id` as a parameter in the request URL and the user id as an owner id from the JWT token in the request header.
+
+The endpoint will delete the property from the database by id using the property model. If the property is deleted successfully, it will return a JSON response with the status code `200` and a message:
+
+``` json
+{
+  "status": 200,
+  "message": "Property deleted  successfully",
+}
+```
+
+If there is any internal server error, it will return a JSON response with the status code 500 and an error message:
+
+``` json
+{
+  "status": 500,
+  "message": "Internal Server Error",
+  "error": "<error message>",
+}
+```
