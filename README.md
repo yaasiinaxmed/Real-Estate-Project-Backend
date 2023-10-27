@@ -10,7 +10,7 @@ The Real Estate Marketplace API is a RESTful web service that allows users to cr
  the user controller and the property controller. The user controller handles the operations related to users, such as signing up, logging in, and updating or deleting their accounts. The property controller handles the operations related to properties, such as creating, reading, updating, or deleting properties, sending requests to owners, approving requests, and getting transactions.
 
 ### User Sign Up 
-###### Endpoint: `api/users/signup`
+#### Endpoint: `api/users/signup`
 This endpoint allows a new user to sign up for the real estate marketplace. It requires the following parameters in the request body:
 
 | Parameter  | Type     | Required    | Description |
@@ -26,21 +26,9 @@ If the user is created successfully, it will return a JSON response with the sta
     "message": "User created successfully"
 }
 ```
-If the user email already exists, it will return a JSON response with the status code 409 and a message:
+If the user email already exists, a `409 Conflict` response will be returned.
+If the user is not created, a `400 bad request` response will be returned.
 
-``` json
-{
-    "status": 409,
-    "message": "User email already exists"
-}
-```
-if the user is not created, it will return a JSON response with the status code 400 and a message:
-``` json
-{
-    "status": 400,
-    "message": "User was not created!"
-}
-```
 If there is any internal server error, it will return a JSON response with the status code 500 and an error message:
 ``` json
 {
