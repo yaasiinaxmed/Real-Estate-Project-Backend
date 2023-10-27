@@ -376,5 +376,5 @@ A transaction is a record of a completed deal between owners and renters for a p
 - `Authentication required`: The request requires authentication, but the user is not authenticated.
 - `Invalid token`: The provided token is invalid or expired.
 - `Request already sent for this property`: The authenticated user has already sent a request to move into the requested property.
-- `Request was not sended!`: The request not sending or The owner of the property is the same as the person who is sending the request.
+- `Request was not sended!`: The owner of the property is the same as the person who is sending the request.
 - `Internal Server Error`: An internal server error occurred.
