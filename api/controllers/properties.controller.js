@@ -2,6 +2,31 @@ import propertyModel from "../models/property.model.js";
 import requestModel from "../models/request.model.js";
 import transactionModel from "../models/transactions.model.js";
 
+// Get Properties and search filter - GET
+export const getProperties = async (req, res) => {
+  try {
+    const search = req.query;
+
+    const properties = await propertyModel.find(search);
+
+    if (properties.length === 0) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "Properties not found" });
+    }
+
+    res.status(200).json(properties);
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        status: 500,
+        message: "Internal Server Error",
+        error: error.message,
+      });
+  }
+};
+
 // create property - POST
 export const createProperty = async (req, res) => {
   try {
@@ -40,31 +65,6 @@ export const createProperty = async (req, res) => {
     res
       .status(200)
       .json({ status: 200, message: "Property created successfully" });
-  } catch (error) {
-    res
-      .status(500)
-      .json({
-        status: 500,
-        message: "Internal Server Error",
-        error: error.message,
-      });
-  }
-};
-
-// Get Properties and search filter - GET
-export const getProperties = async (req, res) => {
-  try {
-    const search = req.query;
-
-    const properties = await propertyModel.find(search);
-
-    if (properties.length === 0) {
-      return res
-        .status(404)
-        .json({ status: 404, message: "Properties not found" });
-    }
-
-    res.status(200).json(properties);
   } catch (error) {
     res
       .status(500)

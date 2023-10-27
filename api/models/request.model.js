@@ -47,6 +47,6 @@ const requestSchema = new mongoose.Schema({
     }
 }, {timestamps: true})
 
-const requestModel = mongoose.model("request", requestSchema)
+const requestModel = mongoose.model("Request", requestSchema)
 
 export default requestModel

@@ -17,7 +17,7 @@ mongoose.connect(process.env.DATABASE_URL).then(() => {
 })
 
 // routes
-server.use("/api/auth", userRouter)
+server.use("/api/users", userRouter)
 server.use("/api/properties", propertiesRouter)
 
 export default server
