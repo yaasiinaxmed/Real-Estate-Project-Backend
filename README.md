@@ -140,3 +140,39 @@ The endpoint will delete the user from the database by id using the user model. 
     "message": "User deleted successfully"
 }
 ```
+### Get Properties and Search Filter
+#### Endpoint: `GET /api/properties/`
+This endpoint returns all the properties in the database using the property model. It also allows filtering by query parameters in the request URL.
+
+The endpoint accepts the following query parameters:
+
+| Query Parameter  | Type     | Required    | Description |
+|------------| -------- | ------------|-------------|
+| title      | String   | No         | The title of the property. |
+| price      | String   | No         | The price of the property. |
+| bedrooms      | String   | No         |  The number of bedrooms in the property.|
+| bathrooms      | String   | No         |  The number of bathrooms in the property.|
+| location      | String   | No         |  The location of the property.|
+| propertyType      | String   | No         |   The type of the property, such as apartment, house, villa, etc.|
+| type      | String   | No         |  The type of the transaction, such as rent or sale. |
+
+The endpoint will find all the properties in the database that match the query parameters using the property model. If there are properties found, it will return a JSON response with an array of properties and their fields:
+
+``` json
+[
+  {
+    "_id": "<property id>",
+    "title": "<property title>",
+    "description": "<property description>",
+    "price": <property price>,
+    "bedrooms": <property bedrooms>,
+    "bathrooms": <property bathrooms>,
+    "location": "<property location>",
+    "propertyType": "<property type>",
+    "type": "<transaction type>",
+    "ownerId": "<owner id>",
+  },
+  ...
+]
+```
+If there are no properties found, it will return a JSON response with the status code `404` and a message `Properties not found`
