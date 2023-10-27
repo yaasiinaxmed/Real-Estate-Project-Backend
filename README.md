@@ -11,7 +11,7 @@ The API uses `JSON` as the data format for requests and responses, and `JWT` as 
  the user controller and the property controller. The user controller handles the operations related to users, such as signing up, logging in, and updating or deleting their accounts. The property controller handles the operations related to properties, such as creating, reading, updating, or deleting properties, sending requests to owners, approving requests, and getting transactions.
 
 ### User Sign Up 
-#### Endpoint: `api/users/signup`
+#### Endpoint: `POST /api/users/signup`
 This endpoint allows a new user to sign up for the real estate marketplace. It requires the following parameters in the request body:
 
 | Parameter  | Type     | Required    | Description |
@@ -41,7 +41,7 @@ If there is any internal server error, it will return a JSON response with the s
 ```
 
 ### User Login 
-#### Endpoint: `api/users/login`
+#### Endpoint: `POST /api/users/login`
 This endpoint allows an existing user to log in to the real estate marketplace. It requires the following parameters in the request body:
 
 | Parameter  | Type     | Required    | Description |
