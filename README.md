@@ -350,7 +350,7 @@ A transaction is a record of a completed deal between owners and renters for a p
     "bathrooms": 2,
     "location": "New York, NY",
     "propertyType": "Apartment",
-    "type": "Rent",
+    "type": "for rent",
     "ownerId": "60f9a3c8a9d2f31a4c8b4568",
     "senderId": "60f9a3c8a9d2f31a4c8b4569",
     "approveId": "60f9a3c8a9d2f31a4c8b4567"
@@ -364,7 +364,7 @@ A transaction is a record of a completed deal between owners and renters for a p
     "bathrooms": 1,
     "location": "Los Angeles, CA",
     "propertyType": "House",
-    "type": "Buy",
+    "type": "for sell",
     "ownerId": "60f9a3c8a9d2f31a4c8b4571",
     "senderId": "60f9a3c8a9d2f31a4c8b4572",
     "approveId": "60f9a3c8a9d2f31a4c8b4570"
