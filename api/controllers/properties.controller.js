@@ -31,26 +31,9 @@ export const getProperties = async (req, res) => {
 export const createProperty = async (req, res) => {
   try {
     const ownerId = req.user.id;
-    const {
-      title,
-      description,
-      price,
-      bedrooms,
-      bathrooms,
-      location,
-      propertyType,
-      type,
-    } = req.body;
 
     const newProperty = new propertyModel({
-      title,
-      description,
-      price,
-      bedrooms,
-      bathrooms,
-      location,
-      propertyType,
-      type,
+      ...req.body,
       owner: ownerId,
     });
 
@@ -166,7 +149,7 @@ export const sendRequest = async (req, res) => {
     if (property.owner === senderId) {
       return res
         .status(400)
-        .json({ status: 400, message: "Request was not sended!" });
+        .json({ status: 400, message: "Request was not sent!" });
     }
 
     const existingRequest = await requestModel.findOne({
@@ -189,7 +172,7 @@ export const sendRequest = async (req, res) => {
     if (!newRequest) {
       return res
         .status(400)
-        .json({ status: 400, message: "Request was not sended!" });
+        .json({ status: 400, message: "Request was not sent!" });
     }
 
     await newRequest.save();

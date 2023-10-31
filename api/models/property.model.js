@@ -21,7 +21,15 @@ const propertySchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    location: {
+    country: {
+        type: String,
+        required: true
+    },
+    city: {
+        type: String,
+        required: true
+    },
+    address: {
         type: String,
         required: true
     },

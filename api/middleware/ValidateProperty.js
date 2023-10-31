@@ -6,7 +6,9 @@ const validateProperty = async (req, res, next) => {
     await check("price", "Price is required").notEmpty().run(req)
     await check("bedrooms", "Bedrooms is required").notEmpty().run(req)
     await check("bathrooms", "Bathrooms is required").notEmpty().run(req)
-    await check("location", "Location is required").notEmpty().run(req)
+    await check("country", "country is required").notEmpty().run(req)
+    await check("city", "city is required").notEmpty().run(req)
+    await check("address", "address is required").notEmpty().run(req)
     await check("propertyType", "PropertyType is required").notEmpty().run(req)
     await check("type", "Type is required").notEmpty().run(req)
 
