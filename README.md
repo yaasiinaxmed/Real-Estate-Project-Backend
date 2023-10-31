@@ -17,6 +17,7 @@ This endpoint allows a new user to sign up for the real estate marketplace. It r
 
 | Parameter  | Type     | Required    | Description |
 |------------| -------- | ------------|-------------|
+| avater     | String   | No          | The image of the user |
 | Name       | String   | Yes         | The name of the user |
 | Email      | String   | Yes         | The email of the user |
 | Password   | String   | Yes         | The password of the user |
@@ -29,8 +30,8 @@ If the user is created successfully, it will return a JSON response with the sta
     "message": "User created successfully"
 }
 ```
-If the user email already exists, it will return a JSON response with the status code `409` and a message `User email already exists`.
-If the user is not created, it will return a JSON response with the status code `400` and a message `User was not created!`.
+If the user email already exists, it will return a JSON response with the status code `409` and the message `User email already exists`.
+If the user is not created, it will return a JSON response with the status code `400` and the message `User was not created!`.
 
 If there is any internal server error, it will return a JSON response with the status code `500` and an error message:
 ``` json
@@ -51,9 +52,9 @@ This endpoint allows an existing user to log in to the real estate marketplace. 
 | Password   | String   | Yes         | The password of the user |
 
 The endpoint will find the user by email in the database using the user model.
- If the user email is not found, it will return a JSON response with the status code `404` and a message `User email not found`.
+ If the user email is not found, it will return a JSON response with the status code `404` and the message `User email not found`.
 
-If either email or password are missing, it will return a JSON response with the status code `400` and a message
+If either email or password is missing, it will return a JSON response with the status code `400` and a message
 ``` json
 {
     "status": 400,
@@ -97,7 +98,7 @@ If there are no users found, it will return a JSON response with the status code
 #### Endpoint: `/api/users/user`
 This endpoint returns the current user based on the JWT token in the request header. It does not require any parameters in the request body or query.
 
-The endpoint will verify the token using jsonwebtoken and extract the user id from it. It will then find the user by id in the database using the user model and select all their fields except for their password. If the user is found, it will return a JSON response with the user and their fields:
+The endpoint will verify the token using jsonwebtoken and extract the user id from it. It will then find the user by ID in the database using the user model and select all their fields except for their password. If the user is found, it will return a JSON response with the user and their fields:
 
 ``` json
 {
@@ -109,12 +110,12 @@ The endpoint will verify the token using jsonwebtoken and extract the user id fr
 If the user is not found, it will return a JSON response with the status code `404` and a message `user not found`
 
 ### Update User - PUT
-#### Endpoint: `/api/users/update/:id`
-This endpoint allows an existing user to update their information in the database using the user model. It requires the following parameters in the request body:
+#### Endpoint: `/api/users/update`
+This endpoint allows the currently logged-in user to update their information in the database using the user model. It requires the following parameters in the request body:
 
 | Parameter  | Type     | Required    | Description |
 |------------| -------- | ------------|-------------|
-| id   | String | Yes      | The ID of the user. |
+| avater     | String   | No          | The image of the user |
 | Name      | String   | No         | The Name of the user |
 | Email      | String   | No         | The email of the user |
 
@@ -126,15 +127,11 @@ If the user is updated successfully, it will return a JSON response with the sta
     "message": "User updated successfully"
 }
 ```
-If the user is not updated, it will return a JSON response with the status code `400` and a message `User was not updated!`
+If the user is not updated, it will return a JSON response with the status code `400` and the message `User was not updated!`
 
 ###  Delete User - DELETE
-#### Endpoint: `/api/users/delete/:id`
-This endpoint allows an existing user to delete their account from the database using the user model. It does not require any parameters in the request body or query.
-
-| Parameter       | Type    | Required | Description                              |
-| --------------- | ------- | -------- | ---------------------------------------- |
-| id   | String | Yes      | the ID of the user. |
+#### Endpoint: `/api/users/delete`
+This endpoint allows the currently logged-in user to delete their account from the database using the user model. It does not require any parameters in the request body or query.
 
 The endpoint will delete the user from the database by id using the user model. If the user is deleted successfully, it will return a JSON response with the status code `200` and a message 
 
@@ -156,7 +153,9 @@ The endpoint accepts the following query parameters:
 | price      | Number   | No         | The price of the property. |
 | bedrooms      | Number   | No         |  The number of bedrooms in the property.|
 | bathrooms      | Number   | No         |  The number of bathrooms in the property.|
-| location      | String   | No         |  The location of the property.|
+| country      | String   | Yes         | the name of the country where the property is located.|
+| city      | String   | Yes         |  The city of the country.|
+| address      | String   | Yes         | The address of the property.|
 | propertyType      | String   | No         |   The type of the property, such as apartment, house, villa, etc.|
 | type      | String   | No         |  The type of the transaction, such as rent or sale. |
 
@@ -164,19 +163,28 @@ The endpoint will find all the properties in the database that match the query p
 
 ``` json
 [
-  {
-    "_id": "<property id>",
-    "title": "<property title>",
-    "description": "<property description>",
-    "price": <property price>,
-    "bedrooms": <property bedrooms>,
-    "bathrooms": <property bathrooms>,
-    "location": "<property location>",
-    "propertyType": "<property type>",
-    "type": "<transaction type>",
-    "ownerId": "<owner id>",
+ {
+  "_id": "6540c31fadc3a01af827c915",
+  "title": "Villa 2",
+  "description": "This beautiful 3 bedroom home is located in a quiet neighborhood and is close to schools, parks, and shopping.",
+  "price": 12000,
+  "bedrooms": 5,
+  "bathrooms": 2,
+  "country": "USA",
+  "city": "Boynton Beach",
+  "address": "3896 Mulberry Lane",
+  "propertyType": "Single-family home",
+  "type": "for rent",
+  "owner": {
+    "_id": "653bd7ba3a1dd048ab6b094c",
+    "name": "Yaasiin Ahmed",
+    "email": "yaskassoy@gmail.com"
   },
-  ...
+  "createdAt": "2023-10-31T09:04:32.001Z",
+  "updatedAt": "2023-10-31T09:04:32.001Z",
+  "__v": 0
+}
+ ...
 ]
 ```
 If there are no properties found, it will return a JSON response with the status code `404` and a message `Properties not found`
@@ -192,11 +200,13 @@ This endpoint allows an authenticated user to create a new property in the real 
 | price      | Number   | Yes         | The price of the property. |
 | bedrooms      | Number   | Yes         |  The number of bedrooms in the property.|
 | bathrooms      | Number   | Yes         |  The number of bathrooms in the property.|
-| location      | String   | Yes         |  The location of the property.|
+| country      | String   | Yes         | the name of the country where the property is located.|
+| city      | String   | Yes         |  The city of the country.|
+| address      | String   | Yes         | The address of the property.|
 | propertyType      | String   | Yes         |   The type of the property, such as apartment, house, villa, etc.|
 | type      | String   | Yes         |  The type of the transaction, such as rent or sale. |
 
-The endpoint will create a new property in the database using the property model with the provided parameters and the owner id. If the property is created successfully, it will return a JSON response with the status code `200` and a message:
+The endpoint will create a new property in the database using the property model with the provided parameters and the owner ID. If the property is created successfully, it will return a JSON response with the status code `200` and a message:
 
 ``` json
 {
@@ -204,7 +214,7 @@ The endpoint will create a new property in the database using the property model
   "message": "Property created successfully",
 }
 ```
-If the property is not created, it will return a JSON response with the status code `400` and a message `Property was not created`
+If the property is not created, it will return a JSON response with the status code `400` and the message `Property was not created`
 
 ### Update Property - PUT
 #### Endpoint: `/api/properties/update/:id`
@@ -217,12 +227,14 @@ This endpoint allows an authenticated user to update their property in the datab
 | price      | Number   | No         | The price of the property. |
 | bedrooms      | Number   | No         |  The number of bedrooms in the property.|
 | bathrooms      | Number   | No         |  The number of bathrooms in the property.|
-| location      | String   | No         |  The location of the property.|
+| country      | String   | No         | the name of the country where the property is located.|
+| city      | String   | No         |  The city of the country.|
+| address      | String   | No         | The address of the property.|
 | propertyType      | String   | No         |   The type of the property, such as apartment, house, villa, etc.|
 | type      | String   | No         |  The type of the transaction, such as rent or sale. |
-| id   | String | Yes      | ID of the property. |
+| id   | String | Yes     | ID of the property. |
 
-The endpoint will update the property in the database by id using the property model with the provided parameters and the owner id. If the property is updated successfully, it will return a JSON response with the status code `200` and a message:
+The endpoint will update the property in the database by id using the property model with the provided parameters and the owner ID. If the property is updated successfully, it will return a JSON response with the status code `200` and a message:
 
 ``` json
 {
@@ -230,7 +242,7 @@ The endpoint will update the property in the database by id using the property m
   "message": "Property updated  successfully",
 }
 ```
-If the property is not updated, it will return a JSON response with the status code `400` and a message `Property was not updated!`
+If the property is not updated, it will return a JSON response with the status code `400` and the message `Property was not updated!`
 
 ### Delete Property - DELETE
 #### Endpoint: `/api/properties/delete/:id`
@@ -260,7 +272,7 @@ If there is any internal server error, it will return a JSON response with the s
 ```
 ### Send Request - POST
 #### Endpoint: `/api/properties/:id/send_request`
-This endpoint allows a logged in user to send a request to another user for their property in the real estate marketplace.
+This endpoint allows a logged-in user to send a request to another user for their property in the real estate marketplace.
 
 #### Request Parameters
 
@@ -285,32 +297,40 @@ The endpoint returns a list of all requests submitted by renters and buyers in t
 ```json
 [
   {
-    "_id": "60f9a3c8a9d2f31a4c8b4567",
-    "title": "Spacious apartment in downtown",
-    "description": "A beautiful and modern apartment with 3 bedrooms and 2 bathrooms, located in the heart of the city. Close to public transportation, shops, restaurants, and parks.",
-    "price": 1500,
-    "bedrooms": 3,
-    "bathrooms": 2,
-    "location": "New York, NY",
-    "propertyType": "Apartment",
-    "type": "for rent",
-    "ownerId": "60f9a3c8a9d2f31a4c8b4568",
-    "senderId": "60f9a3c8a9d2f31a4c8b4569"
-  },
-  {
-    "_id": "60f9a3c8a9d2f31a4c8b4570",
-    "title": "Cozy house with a garden",
-    "description": "A charming and cozy house with 2 bedrooms and 1 bathroom, located in a quiet and green neighborhood. The house has a large garden with a patio and a barbecue area.",
-    "price": 250000,
-    "bedrooms": 2,
-    "bathrooms": 1,
-    "location": "Los Angeles, CA",
-    "propertyType": "House",
-    "type": "for sell",
-    "ownerId": "60f9a3c8a9d2f31a4c8b4571",
-    "senderId": "60f9a3c8a9d2f31a4c8b4572"
-  }
-]
+     "_id": "65408c57e537dc0e60b87cbd",
+     "property": {
+       "_id": "6540767990c590d80be8fff4",
+       "title": "Villa 2",
+       "description": "This beautiful 3 bedroom home is located in a quiet neighborhood and is close to schools, parks, and shopping.",
+       "price": 12000,
+       "bedrooms": 5,
+       "bathrooms": 2,
+       "country": "USA",
+     "city": "Boynton Beach",
+     "address": "3896 Mulberry Lane",
+     "propertyType": "Single-family home",
+       "type": "for rent",
+       "owner": {
+         "_id": "653bd7ba3a1dd048ab6b094c",
+         "name": "Yaasiin Ahmed",
+         "email": "yaskassoy@gmail.com"
+       },
+       "createdAt": "2023-10-31T03:37:29.598Z",
+       "updatedAt": "2023-10-31T03:37:29.598Z",
+       "__v": 0
+     },
+     "sender": {
+       "_id": "654077c5ccc3680bd822efb9",
+       "name": "Mohamed Abdi",
+       "email": "mohamed@gmail.com"
+     },
+     "isApproved": false,
+     "createdAt": "2023-10-31T05:10:47.168Z",
+     "updatedAt": "2023-10-31T05:19:13.396Z",
+     "__v": 0
+   }
+   ...
+ ]
 ```
 If there are no requests found, it will return a JSON response with the status code `404` and a message `Requests not found`
 
@@ -342,32 +362,44 @@ A transaction is a record of a completed deal between owners and renters for a p
 ```json
 [
   {
-    "_id": "60f9a3c8a9d2f31a4c8b4573",
-    "title": "Spacious apartment in downtown",
-    "description": "A beautiful and modern apartment with 3 bedrooms and 2 bathrooms, located in the heart of the city. Close to public transportation, shops, restaurants, and parks.",
-    "price": 1500,
-    "bedrooms": 3,
-    "bathrooms": 2,
-    "location": "New York, NY",
-    "propertyType": "Apartment",
-    "type": "for rent",
-    "ownerId": "60f9a3c8a9d2f31a4c8b4568",
-    "senderId": "60f9a3c8a9d2f31a4c8b4569",
-    "approveId": "60f9a3c8a9d2f31a4c8b4567"
-  },
-  {
-    "_id": "60f9a3c8a9d2f31a4c8b4574",
-    "title": "Cozy house with a garden",
-    "description": "A charming and cozy house with 2 bedrooms and 1 bathroom, located in a quiet and green neighborhood. The house has a large garden with a patio and a barbecue area.",
-    "price": 250000,
-    "bedrooms": 2,
-    "bathrooms": 1,
-    "location": "Los Angeles, CA",
-    "propertyType": "House",
-    "type": "for sell",
-    "ownerId": "60f9a3c8a9d2f31a4c8b4571",
-    "senderId": "60f9a3c8a9d2f31a4c8b4572",
-    "approveId": "60f9a3c8a9d2f31a4c8b4570"
+    "_id": "65408e50cdd1a60b730200f3",
+    "request": {
+      "_id": "65408c57e537dc0e60b87cbd",
+      "property": {
+        "_id": "6540767990c590d80be8fff4",
+        "title": "Villa 2",
+        "description": "This beautiful 3 bedroom home is located in a quiet neighborhood and is close to schools, parks, and shopping.",
+        "price": 12000,
+        "bedrooms": 5,
+        "bathrooms": 2,
+        "country": "USA",
+        "city": "Boynton Beach",
+        "address": "3896 Mulberry Lane",
+        "propertyType": "Single-family home",
+        "propertyType": "Single-family home",
+        "type": "for rent",
+        "owner": {
+          "_id": "653bd7ba3a1dd048ab6b094c",
+          "name": "yaskassoy2",
+          "email": "yaskassoy4@gmail.com"
+        },
+        "createdAt": "2023-10-31T03:37:29.598Z",
+        "updatedAt": "2023-10-31T03:37:29.598Z",
+        "__v": 0
+      },
+      "sender": {
+        "_id": "654077c5ccc3680bd822efb9",
+        "name": "Yaasiin Ahmed",
+        "email": "yaskassoy2@gmail.com"
+      },
+      "isApproved": true,
+      "createdAt": "2023-10-31T05:10:47.168Z",
+      "updatedAt": "2023-10-31T05:19:13.396Z",
+      "__v": 0
+    },
+    "createdAt": "2023-10-31T05:19:13.002Z",
+    "updatedAt": "2023-10-31T05:19:13.002Z",
+    "__v": 0
   }
 ]
 ```
@@ -376,5 +408,6 @@ A transaction is a record of a completed deal between owners and renters for a p
 - `Authentication required`: The request requires authentication, but the user is not authenticated.
 - `Invalid token`: The provided token is invalid or expired.
 - `Request already sent for this property`: The authenticated user has already sent a request to move into the requested property.
-- `Request was not sended!`: The owner of the property is the same as the person who is sending the request.
+- `Request was not sent!`: The owner of the property is the same as the person who is sending the request.
+- `Request has already been approved`: The property has already been approved by the owner
 - `Internal Server Error`: An internal server error occurred.
