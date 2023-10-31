@@ -1,3 +1,4 @@
+import { isValidObjectId } from "mongoose";
 import propertyModel from "../models/property.model.js";
 import requestModel from "../models/request.model.js";
 import transactionModel from "../models/transactions.model.js";
@@ -135,7 +136,7 @@ export const sendRequest = async (req, res) => {
     const id = req.params.id;
     const senderId = req.user.id;
 
-    const property = await propertyModel.findById(id);
+    const property = await propertyModel.findById(id).populate("owner");
 
     if (!property) {
       return res
@@ -143,7 +144,7 @@ export const sendRequest = async (req, res) => {
         .json({ status: 404, message: "Property not found" });
     }
 
-    if (property.owner === senderId) {
+    if (property.owner.id === senderId) {
       return res
         .status(400)
         .json({ status: 400, message: "The Request was not sent!" });
