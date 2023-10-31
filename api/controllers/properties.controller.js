@@ -63,30 +63,17 @@ export const updateProperty = async (req, res) => {
     const id = req.params.id;
     const ownerId = req.user.id;
 
-    const {
-      title,
-      description,
-      price,
-      bedrooms,
-      bathrooms,
-      location,
-      propertyType,
-      type,
-    } = req.body;
+     // Check if the current user is the owner of the property.
+     const property = await propertyModel.findById(id);
+     if (property.owner !== ownerId) {
+       return res
+         .status(403)
+         .json({ status: 403, message: "You are not authorized to update this property." });
+     }
 
     const updatedProperty = await propertyModel.findByIdAndUpdate(
       { _id: id },
-      {
-        title,
-        description,
-        price,
-        bedrooms,
-        bathrooms,
-        location,
-        propertyType,
-        type,
-        owner: ownerId,
-      }
+      {...req.body}
     );
 
     if (!updatedProperty) {
@@ -111,6 +98,16 @@ export const updateProperty = async (req, res) => {
 export const deleteProperty = async (req, res) => {
   try {
     const id = req.params.id;
+    const ownerId = req.user.id
+
+    // Check if the current user is the owner of the property.
+    const property = await propertyModel.findById(id);
+
+    if (property.owner !== ownerId) {
+      return res
+        .status(403)
+        .json({ status: 403, message: "You are not authorized to delete this property." });
+    }
 
     const deletedProperty = await propertyModel.findByIdAndDelete({ _id: id });
 
@@ -149,7 +146,7 @@ export const sendRequest = async (req, res) => {
     if (property.owner === senderId) {
       return res
         .status(400)
-        .json({ status: 400, message: "Request was not sent!" });
+        .json({ status: 400, message: "The Request was not sent!" });
     }
 
     const existingRequest = await requestModel.findOne({
@@ -160,7 +157,7 @@ export const sendRequest = async (req, res) => {
     if (existingRequest) {
       return res.status(400).json({
         status: 409,
-        message: "Request has already been sent this property",
+        message: "The Request has already been sent this property",
       });
     }
 
@@ -172,14 +169,14 @@ export const sendRequest = async (req, res) => {
     if (!newRequest) {
       return res
         .status(400)
-        .json({ status: 400, message: "Request was not sent!" });
+        .json({ status: 400, message: "The Request was not sent!" });
     }
 
     await newRequest.save();
 
     res
       .status(200)
-      .json({ status: 200, message: "Request was sending successfully" });
+      .json({ status: 200, message: "The Request was sent successfully" });
   } catch (error) {
     res.status(500).json({
       status: 500,
@@ -203,7 +200,7 @@ export const getRequests = async (req, res) => {
     if (requests.length === 0) {
       return res
         .status(404)
-        .json({ status: 404, message: "Requests not found" });
+        .json({ status: 404, message: "The Requests not found" });
     }
 
     res.status(200).json(requests);
@@ -226,7 +223,7 @@ export const approveToRequest = async (req, res) => {
     if (!request) {
       return res
         .status(404)
-        .json({ status: 404, message: "Requests not found" });
+        .json({ status: 404, message: "The Requests not found" });
     }
 
     if (request.isApproved) {
@@ -243,7 +240,7 @@ export const approveToRequest = async (req, res) => {
     if (!newTransaction) {
       return res
         .status(400)
-        .json({ status: 400, message: "Request was not approved!" });
+        .json({ status: 400, message: "The Request was not approved!" });
     }
 
     await newTransaction.save();

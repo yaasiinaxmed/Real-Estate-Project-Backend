@@ -18,7 +18,7 @@ const verifyToken = async (req, res, next) => {
 
     jwt.verify(tokenWithoutBearer, SECRET_KEY, (error, decode) => {
         if(error) {
-            return res.status(401).jsonL({status: 401, message: "Invalid token"})
+            return res.status(401).json({status: 401, message: "Invalid token"})
         }
 
         req.user = decode
