@@ -7,7 +7,9 @@ export const getProperties = async (req, res) => {
   try {
     const search = req.query;
 
-    const properties = await propertyModel.find(search);
+    const properties = await propertyModel
+      .find(search)
+      .populate("owner", "name email");
 
     if (properties.length === 0) {
       return res
@@ -17,13 +19,11 @@ export const getProperties = async (req, res) => {
 
     res.status(200).json(properties);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        status: 500,
-        message: "Internal Server Error",
-        error: error.message,
-      });
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
 
@@ -51,7 +51,7 @@ export const createProperty = async (req, res) => {
       location,
       propertyType,
       type,
-      ownerId,
+      owner: ownerId,
     });
 
     if (!newProperty) {
@@ -66,13 +66,11 @@ export const createProperty = async (req, res) => {
       .status(200)
       .json({ status: 200, message: "Property created successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        status: 500,
-        message: "Internal Server Error",
-        error: error.message,
-      });
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
 
@@ -104,7 +102,7 @@ export const updateProperty = async (req, res) => {
         location,
         propertyType,
         type,
-        ownerId,
+        owner: ownerId,
       }
     );
 
@@ -118,13 +116,11 @@ export const updateProperty = async (req, res) => {
       .status(200)
       .json({ status: 200, message: "Property updated successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        status: 500,
-        message: "Internal Server Error",
-        error: error.message,
-      });
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
 
@@ -145,13 +141,11 @@ export const deleteProperty = async (req, res) => {
       .status(200)
       .json({ status: 200, message: "Property deleted successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        status: 500,
-        message: "Internal Server Error",
-        error: error.message,
-      });
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
 
@@ -169,35 +163,27 @@ export const sendRequest = async (req, res) => {
         .json({ status: 404, message: "Property not found" });
     }
 
-    if (property.ownerId === senderId) {
+    if (property.owner === senderId) {
       return res
         .status(400)
         .json({ status: 400, message: "Request was not sended!" });
     }
 
     const existingRequest = await requestModel.findOne({
-      requestId: property._id,
-      senderId,
+      property: property._id,
+      sender: senderId,
     });
 
     if (existingRequest) {
-      return res
-        .status(400)
-        .json({ status: 409, message: "Request has already been sent this property" });
+      return res.status(400).json({
+        status: 409,
+        message: "Request has already been sent this property",
+      });
     }
 
     const newRequest = await requestModel.create({
-      title: property.title,
-      description: property.description,
-      price: property.price,
-      bedrooms: property.bedrooms,
-      bathrooms: property.bathrooms,
-      location: property.location,
-      propertyType: property.propertyType,
-      type: property.type,
-      ownerId: property.ownerId,
-      senderId,
-      requestId: property._id,
+      property: property._id,
+      sender: senderId,
     });
 
     if (!newRequest) {
@@ -212,20 +198,24 @@ export const sendRequest = async (req, res) => {
       .status(200)
       .json({ status: 200, message: "Request was sending successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        status: 500,
-        message: "Internal Server Error",
-        error: error.message,
-      });
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
 
 // Get Requests - GET
 export const getRequests = async (req, res) => {
   try {
-    const requests = await requestModel.find();
+    const requests = await requestModel.find().populate([
+      { path: "sender", select: "name email" },
+      {
+        path: "property",
+        populate: { path: "owner", select: "name email" },
+      },
+    ]);
 
     if (requests.length === 0) {
       return res
@@ -235,13 +225,11 @@ export const getRequests = async (req, res) => {
 
     res.status(200).json(requests);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        status: 500,
-        message: "Internal Server Error",
-        error: error.message,
-      });
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
 
@@ -258,18 +246,15 @@ export const approveToRequest = async (req, res) => {
         .json({ status: 404, message: "Requests not found" });
     }
 
+    if (request.isApproved) {
+      return res.status(409).json({
+        status: 409,
+        message: "The request has already been approved.",
+      });
+    }
+
     const newTransaction = new transactionModel({
-      title: request.title,
-      description: request.description,
-      price: request.price,
-      bedrooms: request.bedrooms,
-      bathrooms: request.bathrooms,
-      location: request.location,
-      propertyType: request.propertyType,
-      type: request.type,
-      ownerId: request.ownerId,
-      senderId: request.senderId,
-      approveId: request._id,
+      request: request._id,
     });
 
     if (!newTransaction) {
@@ -280,29 +265,34 @@ export const approveToRequest = async (req, res) => {
 
     await newTransaction.save();
 
-    await requestModel.findByIdAndDelete(id)
+    await requestModel.findByIdAndUpdate({ _id: id }, { isApproved: true });
 
-    res
-      .status(200)
-      .json({
-        status: 200,
-        message: "The request has been successfully approved ",
-      });
+    res.status(200).json({
+      status: 200,
+      message: "The request has been successfully approved ",
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        status: 500,
-        message: "Internal Server Error",
-        error: error.message,
-      });
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
 
 // Get Transactions - GET
 export const getTransactions = async (req, res) => {
   try {
-    const transactions = await transactionModel.find();
+    const transactions = await transactionModel.find().populate({
+      path: "request",
+      populate: [
+        { path: "sender", select: "name email" },
+        {
+          path: "property",
+          populate: { path: "owner", select: "name email" },
+        },
+      ],
+    });
 
     if (transactions.length === 0) {
       return res
@@ -312,12 +302,10 @@ export const getTransactions = async (req, res) => {
 
     res.status(200).json(transactions);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        status: 500,
-        message: "Internal Server Error",
-        error: error.message,
-      });
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };

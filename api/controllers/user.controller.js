@@ -107,11 +107,11 @@ export const user = async (req, res) => {
 export const userUpdate = async (req, res) => {
     try {
 
-        const id = req.params.id
+        const userId = req.user.id
         const {name, email} = req.body
         
         const updatedUser = await userModel.findByIdAndUpdate(
-            {_id: id},
+            {_id: userId},
             {
                 name: name,
                 email: email,
@@ -133,9 +133,9 @@ export const userUpdate = async (req, res) => {
 export const userDelete = async (req, res) => {
     try {
         
-        const id = req.params.id
+        const userId = req.user.id
 
-        const deletedUser = await userModel.findByIdAndDelete({_id: id})
+        const deletedUser = await userModel.findByIdAndDelete({_id: userId})
 
         if(!deletedUser) {
             return res.status(400).json({status: 400, message: "User was not deleted!"})

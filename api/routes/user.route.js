@@ -10,7 +10,7 @@ router.post("/signup", validateUser, signup)
 router.post("/login", login)
 router.get("/", users)
 router.get("/user", verifyToken, user)
-router.put("/update/:id", verifyToken, userUpdate)
-router.delete("/delete/:id", verifyToken, userDelete)
+router.put("/update", verifyToken, userUpdate)
+router.delete("/delete", verifyToken, userDelete)
 
 export default router

@@ -33,9 +33,9 @@ const propertySchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    ownerId: {
-        type: String,
-        required: true
+    owner: {
+        type: mongoose.Types.ObjectId,
+        ref: "User"
     }
 }, {timestamps: true})
 

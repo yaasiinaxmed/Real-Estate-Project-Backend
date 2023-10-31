@@ -1,49 +1,17 @@
 import mongoose from 'mongoose'
 
 const requestSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true
+    property: {
+        type: mongoose.Types.ObjectId,
+        ref: "Property"
     },
-    description: {
-        type: String,
-        required: true
+    sender: {
+        type: mongoose.Types.ObjectId,
+        ref: "User"
     },
-    price: {
-        type: String,
-        required: true
-    },
-    bedrooms: {
-        type: Number,
-        required: true
-    },
-    bathrooms: {
-        type: Number,
-        required: true
-    },
-    location: {
-        type: String,
-        required: true
-    },
-    propertyType: {
-        type: String,
-        required: true
-    },
-    type: {
-        type: String,
-        required: true
-    },
-    ownerId: {
-        type: String,
-        required: true
-    },
-    senderId: {
-        type: String,
-        required: true
-    },
-    requestId: {
-        type: String,
-        required: true
+    isApproved: {
+        type: Boolean,
+        default: false
     }
 }, {timestamps: true})
 
