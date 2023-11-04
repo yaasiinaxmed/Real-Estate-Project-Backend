@@ -8,9 +8,9 @@ dotenv.config()
 const SECRET_KEY = process.env.SECRET_KEY
 
 // Sign Up - POST
-export const signup = async (req, res) => {
+export const signup = async (req, res, next) => {
     try {
-        const {name, email, password} = req.body
+        const {name, email, role, password} = req.body
 
         const user = await userModel.findOne({email})
 
@@ -23,6 +23,7 @@ export const signup = async (req, res) => {
         const newUser = new userModel({
             name,
             email,
+            role,
             password: hashedPassword
         })
 
@@ -63,7 +64,7 @@ export const login = async (req, res) => {
             return res.status(401).json({status: 401, message: "Password is not correct!"})
         }
 
-        const token = jwt.sign({id: user._id}, SECRET_KEY, {expiresIn: "7d"})
+        const token = jwt.sign({id: user._id, role: user.role}, SECRET_KEY, {expiresIn: "7d"})
 
         res.status(200).json({status: 200, message: "User logged in successfully", token})
     } catch (error) {
@@ -78,7 +79,7 @@ export const users = async (req, res) => {
         const users = await userModel.find().select("-password")
 
         if(users.length === 0) {
-            return res.status(404).json({status: 404, message: "Users not found"})
+           return res.status(404).json({status: 404, message: "Users not found"})
         }
 
         res.status(200).json(users)

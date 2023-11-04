@@ -44,6 +44,10 @@ const propertySchema = new mongoose.Schema({
     owner: {
         type: mongoose.Types.ObjectId,
         ref: "User"
+    },
+    available: {
+        type: Boolean,
+        default: true
     }
 }, {timestamps: true})
 

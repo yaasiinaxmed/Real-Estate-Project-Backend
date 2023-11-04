@@ -1,7 +1,7 @@
-import { isValidObjectId } from "mongoose";
 import propertyModel from "../models/property.model.js";
 import requestModel from "../models/request.model.js";
 import transactionModel from "../models/transactions.model.js";
+import userModel from "../models/user.model.js";
 
 // Get Properties and search filter - GET
 export const getProperties = async (req, res) => {
@@ -32,23 +32,38 @@ export const getProperties = async (req, res) => {
 export const createProperty = async (req, res) => {
   try {
     const ownerId = req.user.id;
+    const role = req.user.role;
 
-    const newProperty = new propertyModel({
-      ...req.body,
-      owner: ownerId,
-    });
+    if (role === "owner") {
+      const owner = await userModel.findById({_id: ownerId})
 
-    if (!newProperty) {
-      return res
-        .status(400)
-        .json({ status: 400, message: "Property was not created!" });
+      if(!owner) {
+        return res.status(404).json({status: 404, message: "The owner not found"})
+      }
+
+      const newProperty = new propertyModel({
+        ...req.body,
+        owner: ownerId,
+      });
+
+      if (!newProperty) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Property was not created!" });
+      }
+
+      await newProperty.save();
+
+      res
+        .status(200)
+        .json({ status: 200, message: "Property created successfully" });
+
+    } else {
+      res.status(400).json({
+        status: 400,
+        message: "You are not authorized to create a property",
+      });
     }
-
-    await newProperty.save();
-
-    res
-      .status(200)
-      .json({ status: 200, message: "Property created successfully" });
   } catch (error) {
     res.status(500).json({
       status: 500,
@@ -62,30 +77,53 @@ export const createProperty = async (req, res) => {
 export const updateProperty = async (req, res) => {
   try {
     const id = req.params.id;
-    const ownerId = req.user.id;
+    const role = req.user.role;
 
-     // Check if the current user is the owner of the property.
-     const property = await propertyModel.findById(id);
-     if (property.owner !== ownerId) {
-       return res
-         .status(403)
-         .json({ status: 403, message: "You are not authorized to update this property." });
-     }
+    if (role === "owner") {
+      const ownerId = req.user.id;
 
-    const updatedProperty = await propertyModel.findByIdAndUpdate(
-      { _id: id },
-      {...req.body}
-    );
+      const owner = await userModel.findById({_id: ownerId})
 
-    if (!updatedProperty) {
-      return res
-        .status(400)
-        .json({ status: 400, message: "Property was not updated!" });
+      if(!owner) {
+        return res.status(404).json({status: 404, message: "The owner not found"})
+      }
+
+      const property = await propertyModel.findById(id);
+
+      if(!property) {
+        return res.status(404).json({
+          status: 404,
+          message: "The Property not found",
+        });
+      }
+
+      if (property.owner.toString() !== ownerId) {
+        return res.status(403).json({
+          status: 403,
+          message: "You are not authorized to update this property.",
+        });
+      }
+
+      const updatedProperty = await propertyModel.findByIdAndUpdate(
+        { _id: id },
+        { ...req.body }
+      );
+
+      if (!updatedProperty) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Property was not updated!" });
+      }
+
+      res
+        .status(200)
+        .json({ status: 200, message: "Property updated successfully" });
+    } else {
+      res.status(400).json({
+        status: 400,
+        message: "You are not authorized to update a property",
+      });
     }
-
-    res
-      .status(200)
-      .json({ status: 200, message: "Property updated successfully" });
   } catch (error) {
     res.status(500).json({
       status: 500,
@@ -99,28 +137,52 @@ export const updateProperty = async (req, res) => {
 export const deleteProperty = async (req, res) => {
   try {
     const id = req.params.id;
-    const ownerId = req.user.id
+    const role = req.user.role;
 
-    // Check if the current user is the owner of the property.
-    const property = await propertyModel.findById(id);
+    if (role === "owner") {
+      const ownerId = req.user.id;
 
-    if (property.owner !== ownerId) {
-      return res
-        .status(403)
-        .json({ status: 403, message: "You are not authorized to delete this property." });
-    }
+      const owner = await userModel.findById({_id: ownerId})
 
-    const deletedProperty = await propertyModel.findByIdAndDelete({ _id: id });
+      if(!owner) {
+        return res.status(404).json({status: 404, message: "The owner not found"})
+      }
 
-    if (!deletedProperty) {
-      return res
+      const property = await propertyModel.findById(id);
+
+      if(!property) {
+        return res.status(404).json({
+          status: 404,
+          message: "The Property not found",
+        });
+      }
+
+      if (property.owner.toString() !== ownerId) {
+        return res.status(403).json({
+          status: 403,
+          message: "You are not authorized to delete this property.",
+        });
+      }
+
+      const deletedProperty = await propertyModel.findByIdAndDelete(id);
+
+      if (!deletedProperty) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Property was not deleted" });
+      }
+
+      res
+        .status(200)
+        .json({ status: 200, message: "Property deleted successfully" });
+    } else {
+      res
         .status(400)
-        .json({ status: 400, message: "Property was not deleted" });
+        .json({
+          status: 400,
+          message: "You are not authorized to delete a property",
+        });
     }
-
-    res
-      .status(200)
-      .json({ status: 200, message: "Property deleted successfully" });
   } catch (error) {
     res.status(500).json({
       status: 500,
@@ -134,50 +196,66 @@ export const deleteProperty = async (req, res) => {
 export const sendRequest = async (req, res) => {
   try {
     const id = req.params.id;
-    const senderId = req.user.id;
+    const role = req.user.role;
 
-    const property = await propertyModel.findById(id).populate("owner");
+    if(role === "renter") {
+      const senderId = req.user.id;
 
-    if (!property) {
-      return res
-        .status(404)
-        .json({ status: 404, message: "Property not found" });
-    }
+      const sender = await userModel.findById({_id: senderId})
 
-    if (property.owner.id === senderId) {
-      return res
-        .status(400)
-        .json({ status: 400, message: "The Request was not sent!" });
-    }
+      if(!sender) {
+        return res.status(404).json({status: 404, message: "The user sender request not found"})
+      }
 
-    const existingRequest = await requestModel.findOne({
-      property: property._id,
-      sender: senderId,
-    });
+      const property = await propertyModel.findById(id).populate("owner");
+  
+      if (!property) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "The Property not found" });
+      }
+  
+      if (property.owner.id === senderId) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "The Request was not sent!" });
+      }
 
-    if (existingRequest) {
-      return res.status(400).json({
-        status: 409,
-        message: "The Request has already been sent this property",
+      if(property.available === false ) {
+        return res.status(400).json({status: 400, message: "The property is currently unavailable"})
+      }
+  
+      const existingRequest = await requestModel.findOne({
+        property: property._id,
+        sender: senderId,
       });
+  
+      if (existingRequest) {
+        return res.status(400).json({
+          status: 409,
+          message: "The Request has already been sent this property",
+        });
+      }
+  
+      const newRequest = await requestModel.create({
+        property: property._id,
+        sender: senderId,
+      });
+  
+      if (!newRequest) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "The Request was not sent!" });
+      }
+  
+      await newRequest.save();
+  
+      res
+        .status(200)
+        .json({ status: 200, message: "The Request was sent successfully" });
+    } else {
+      res.status(400).json({status: 400, message: "You are not authorized to send request a property"})
     }
-
-    const newRequest = await requestModel.create({
-      property: property._id,
-      sender: senderId,
-    });
-
-    if (!newRequest) {
-      return res
-        .status(400)
-        .json({ status: 400, message: "The Request was not sent!" });
-    }
-
-    await newRequest.save();
-
-    res
-      .status(200)
-      .json({ status: 200, message: "The Request was sent successfully" });
   } catch (error) {
     res.status(500).json({
       status: 500,
@@ -217,9 +295,13 @@ export const getRequests = async (req, res) => {
 // Approve to requests - POST
 export const approveToRequest = async (req, res) => {
   try {
-    const id = req.params.id;
+   const role = req.user.role;
 
-    const request = await requestModel.findById(id);
+   if(role === "owner") {
+    const id = req.params.id;
+    const ownerId = req.user.id
+
+    const request = await requestModel.findById(id).populate("property");
 
     if (!request) {
       return res
@@ -227,7 +309,11 @@ export const approveToRequest = async (req, res) => {
         .json({ status: 404, message: "The Requests not found" });
     }
 
-    if (request.isApproved) {
+    if(request.property.owner.toString() !== ownerId) {
+      return res.status(400).json({status: 400, message: "You are not authorized to approve request this a property"})
+    }
+
+    if (request.isApproved === true) {
       return res.status(409).json({
         status: 409,
         message: "The request has already been approved.",
@@ -246,12 +332,19 @@ export const approveToRequest = async (req, res) => {
 
     await newTransaction.save();
 
+    // Update the property availability
+    await propertyModel.findByIdAndUpdate({ _id: request.property._id }, { available: false })
+
+    // Update the request to mark it as approved
     await requestModel.findByIdAndUpdate({ _id: id }, { isApproved: true });
 
     res.status(200).json({
       status: 200,
       message: "The request has been successfully approved ",
     });
+   } else {
+    res.status(400).json({status: 400, message: "You are not authorized to approve request a property"})
+   }
   } catch (error) {
     res.status(500).json({
       status: 500,

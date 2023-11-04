@@ -1,9 +1,15 @@
 import {check, validationResult } from 'express-validator'
 
+const validRoles = ["owner", "renter"]
+
 const validateUser = async (req, res, next) => {
     await check("name", "name is required").notEmpty().run(req)
     await check("email", "email is required").notEmpty().isEmail().run(req)
     await check("password", 'password is required').notEmpty().run(req)
+    await check("role", "role is required").notEmpty()
+    .isIn(validRoles)
+    .withMessage(`Role must be owner or renter`)
+    .run(req)
 
     const errors = validationResult(req)
     const errorMessage = errors.array().map((error) => error.msg)
