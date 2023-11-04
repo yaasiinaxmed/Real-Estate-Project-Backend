@@ -414,6 +414,7 @@ Retrieve a list of rental transactions. Users with the "owner" role can view tra
 - `Request was not sent!`: The owner of the property is the same as the person who is sending the request.
 - `Request has already been approved`: The property has already been approved by the owner
 - `Role must be owner or renter`: This field specifies the role or permission level of the user, it must be `owner` or `renter`
-- `You are not authorized to create a property`: The action of creating a property is not authorized unless one holds the "owner" role.
+- `You are not authorized to create a property`: The action of creating a property is not authorized unless one holds the `owner` role.
 - `You do not own this property`: It seems that you are not the rightful owner of this property.
+- `The property is currently unavailable`: that means the property is not available at this time.
 - `Internal Server Error`: An internal server error occurred.
