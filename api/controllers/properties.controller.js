@@ -100,7 +100,7 @@ export const updateProperty = async (req, res) => {
       if (property.owner.toString() !== ownerId) {
         return res.status(403).json({
           status: 403,
-          message: "You are not authorized to update this property.",
+          message: "You do not own this property!",
         });
       }
 
@@ -160,7 +160,7 @@ export const deleteProperty = async (req, res) => {
       if (property.owner.toString() !== ownerId) {
         return res.status(403).json({
           status: 403,
-          message: "You are not authorized to delete this property.",
+          message: "You do not own this property!",
         });
       }
 
