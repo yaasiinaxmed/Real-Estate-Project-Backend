@@ -18,9 +18,10 @@ This endpoint allows a new user to sign up for the real estate marketplace. It r
 | Parameter  | Type     | Required    | Description |
 |------------| -------- | ------------|-------------|
 | avater     | String   | No          | The image of the user |
-| Name       | String   | Yes         | The name of the user |
-| Email      | String   | Yes         | The email of the user |
-| Password   | String   | Yes         | The password of the user |
+| name       | String   | Yes         | The name of the user |
+| email      | String   | Yes         | The email of the user |
+| role      | String   | Yes         | This field specifies the role or permission level of the user, it must be `owner` or `renter` |
+| password   | String   | Yes         | The password of the user |
 
 The endpoint will hash the password using bcrypt and save the user in the database using the user model. 
 If the user is created successfully, it will return a JSON response with the status code `201` and a message
@@ -48,8 +49,8 @@ This endpoint allows an existing user to log in to the real estate marketplace. 
 
 | Parameter  | Type     | Required    | Description |
 |------------| -------- | ------------|-------------|
-| Email      | String   | Yes         | The email of the user |
-| Password   | String   | Yes         | The password of the user |
+| email      | String   | Yes         | The email of the user |
+| password   | String   | Yes         | The password of the user |
 
 The endpoint will find the user by email in the database using the user model.
  If the user email is not found, it will return a JSON response with the status code `404` and the message `User email not found`.
@@ -116,8 +117,9 @@ This endpoint allows the currently logged-in user to update their information in
 | Parameter  | Type     | Required    | Description |
 |------------| -------- | ------------|-------------|
 | avater     | String   | No          | The image of the user |
-| Name      | String   | No         | The Name of the user |
-| Email      | String   | No         | The email of the user |
+| name      | String   | No         | The Name of the user |
+| role      | String   | No         | This field specifies the role or permission level of the user, it must be `owner` or `renter` |
+| email      | String   | No         | The email of the user |
 
 If the user is updated successfully, it will return a JSON response with the status code `200` and a message
 
@@ -145,19 +147,14 @@ The endpoint will delete the user from the database by id using the user model. 
 #### Endpoint: `/api/properties/`
 This endpoint returns all the properties in the database using the property model. It also allows filtering by query parameters in the request URL.
 
-The endpoint accepts the following query parameters:
+#### Query Parameters:
 
-| Query Parameter  | Type     | Required    | Description |
-|------------| -------- | ------------|-------------|
-| title      | String   | No         | The title of the property. |
-| price      | Number   | No         | The price of the property. |
-| bedrooms      | Number   | No         |  The number of bedrooms in the property.|
-| bathrooms      | Number   | No         |  The number of bathrooms in the property.|
-| country      | String   | Yes         | the name of the country where the property is located.|
-| city      | String   | Yes         |  The city of the country.|
-| address      | String   | Yes         | The address of the property.|
-| propertyType      | String   | No         |   The type of the property, such as apartment, house, villa, etc.|
-| type      | String   | No         |  The type of the transaction, such as rent or sale. |
+| Parameter  | Type     | Description    | Example |
+|------------| -------- | -------------- |-------------|
+| country    | String   | Filter by country | `/properties?country=USA` |
+| city    | String   | Filter by city | `/properties?city=New York` |
+| propertyType    | String   | Filter by property type | `/properties?propertyType=ApartmenA` |
+
 
 The endpoint will find all the properties in the database that match the query parameters using the property model. If there are properties found, it will return a JSON response with an array of properties and their fields:
 
@@ -180,6 +177,7 @@ The endpoint will find all the properties in the database that match the query p
     "name": "Yaasiin Ahmed",
     "email": "yaskassoy@gmail.com"
   },
+  "available": true,
   "createdAt": "2023-10-31T09:04:32.001Z",
   "updatedAt": "2023-10-31T09:04:32.001Z",
   "__v": 0
@@ -191,7 +189,9 @@ If there are no properties found, it will return a JSON response with the status
 
 ### Create Property - POST
 #### Endpoint: `/api/properties/create`
-This endpoint allows an authenticated user to create a new property in the real estate marketplace. It requires the following parameters in the request body:
+Create a new property listing. This endpoint is accessible to users with the "owner" role.
+It requires the following parameters in the 
+#### request body:
 
 | Parameter  | Type     | Required    | Description |
 |------------| -------- | ------------|-------------|
@@ -218,7 +218,9 @@ If the property is not created, it will return a JSON response with the status c
 
 ### Update Property - PUT
 #### Endpoint: `/api/properties/update/:id`
-This endpoint allows an authenticated user to update their property in the database using the property model. It requires the following parameters in the request body:
+Update an existing property listing. This endpoint is accessible to users with the "owner" role.
+It requires the following parameters in the 
+#### request body:
 
 | Parameter  | Type     | Required    | Description |
 |------------| -------- | ------------|-------------|
@@ -246,7 +248,7 @@ If the property is not updated, it will return a JSON response with the status c
 
 ### Delete Property - DELETE
 #### Endpoint: `/api/properties/delete/:id`
-This endpoint allows an authenticated user to delete their property from the database using the property model.
+Delete an existing property listing. This endpoint is accessible to users with the "owner" role.
 
 | Parameter       | Type    | Required | Description                              |
 | --------------- | ------- | -------- | ---------------------------------------- |
@@ -272,7 +274,7 @@ If there is any internal server error, it will return a JSON response with the s
 ```
 ### Send Request - POST
 #### Endpoint: `/api/properties/:id/send_request`
-This endpoint allows a logged-in user to send a request to another user for their property in the real estate marketplace.
+Send a rental request for a property listing. This endpoint is accessible to users with the "renter" role.
 
 #### Request Parameters
 
@@ -290,7 +292,7 @@ This endpoint allows a logged-in user to send a request to another user for thei
 ```
 ### Get Requests - GET
 #### Endpoint: `/api/properties/requests`
-The endpoint returns a list of all requests submitted by renters and buyers in the database
+Retrieves a list of rental requests. Users with the "owner" role can view and approve requests.
 
 #### Response
 
@@ -315,6 +317,7 @@ The endpoint returns a list of all requests submitted by renters and buyers in t
          "name": "Yaasiin Ahmed",
          "email": "yaskassoy@gmail.com"
        },
+       "available": true,
        "createdAt": "2023-10-31T03:37:29.598Z",
        "updatedAt": "2023-10-31T03:37:29.598Z",
        "__v": 0
@@ -336,7 +339,7 @@ If there are no requests found, it will return a JSON response with the status c
 
 ### Approve to requests - POST
 #### Endpoint: `/api/properties/requests/:id/approve`
-This endpoint approves a request with a given ID and creates a new transaction for it. A transaction is a record of a completed deal between owners and renters for a property.
+To approve a rental request, users with the "owner" role can access this endpoint. It involves assigning a unique ID to the request and creating a transaction for it. A transaction is a record of a completed deal between property owners and renters.
 
 #### Request Parameters
 
@@ -354,8 +357,7 @@ This endpoint approves a request with a given ID and creates a new transaction f
 ```
 ### Get Transactions - GET
 #### Endpoint: `/api/properties/transactions`
-This endpoint returns a list of all transactions in the database,
-A transaction is a record of a completed deal between owners and renters for a property.
+Retrieve a list of rental transactions. Users with the "owner" role can view transaction details.
 
 #### Response
 
@@ -383,6 +385,7 @@ A transaction is a record of a completed deal between owners and renters for a p
           "name": "yaskassoy2",
           "email": "yaskassoy4@gmail.com"
         },
+        "available": false,
         "createdAt": "2023-10-31T03:37:29.598Z",
         "updatedAt": "2023-10-31T03:37:29.598Z",
         "__v": 0
@@ -410,4 +413,7 @@ A transaction is a record of a completed deal between owners and renters for a p
 - `Request already sent for this property`: The authenticated user has already sent a request to move into the requested property.
 - `Request was not sent!`: The owner of the property is the same as the person who is sending the request.
 - `Request has already been approved`: The property has already been approved by the owner
+- `Role must be owner or renter`: This field specifies the role or permission level of the user, it must be `owner` or `renter`
+- `You are not authorized to create a property`: The action of creating a property is not authorized unless one holds the "owner" role.
+- `You do not own this property`: It seems that you are not the rightful owner of this property.
 - `Internal Server Error`: An internal server error occurred.
