@@ -118,7 +118,6 @@ This endpoint allows the currently logged-in user to update their information in
 |------------| -------- | ------------|-------------|
 | avater     | String   | No          | The image of the user |
 | name      | String   | No         | The Name of the user |
-| role      | String   | No         | This field specifies the role or permission level of the user, it must be `owner` or `renter` |
 | email      | String   | No         | The email of the user |
 
 If the user is updated successfully, it will return a JSON response with the status code `200` and a message
