@@ -2,6 +2,7 @@ import propertyModel from "../models/property.model.js";
 import requestModel from "../models/request.model.js";
 import transactionModel from "../models/transactions.model.js";
 import userModel from "../models/user.model.js";
+import messageModel from "../models/Message.model.js";
 
 // Get Properties and search filter - GET
 export const getProperties = async (req, res) => {
@@ -35,10 +36,12 @@ export const createProperty = async (req, res) => {
     const role = req.user.role;
 
     if (role === "owner") {
-      const owner = await userModel.findById({_id: ownerId})
+      const owner = await userModel.findById({ _id: ownerId });
 
-      if(!owner) {
-        return res.status(404).json({status: 404, message: "The owner not found"})
+      if (!owner) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "The owner not found" });
       }
 
       const newProperty = new propertyModel({
@@ -57,11 +60,10 @@ export const createProperty = async (req, res) => {
       res
         .status(200)
         .json({ status: 200, message: "Property created successfully" });
-
     } else {
-      res.status(400).json({
-        status: 400,
-        message: "You are not authorized to create a property",
+      res.status(403).json({
+        status: 403,
+        message: "You don't have permission",
       });
     }
   } catch (error) {
@@ -82,15 +84,17 @@ export const updateProperty = async (req, res) => {
     if (role === "owner") {
       const ownerId = req.user.id;
 
-      const owner = await userModel.findById({_id: ownerId})
+      const owner = await userModel.findById({ _id: ownerId });
 
-      if(!owner) {
-        return res.status(404).json({status: 404, message: "The owner not found"})
+      if (!owner) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "The owner not found" });
       }
 
       const property = await propertyModel.findById(id);
 
-      if(!property) {
+      if (!property) {
         return res.status(404).json({
           status: 404,
           message: "The Property not found",
@@ -119,9 +123,9 @@ export const updateProperty = async (req, res) => {
         .status(200)
         .json({ status: 200, message: "Property updated successfully" });
     } else {
-      res.status(400).json({
-        status: 400,
-        message: "You are not authorized to update a property",
+      res.status(403).json({
+        status: 403,
+        message: "You don't have permission",
       });
     }
   } catch (error) {
@@ -142,15 +146,17 @@ export const deleteProperty = async (req, res) => {
     if (role === "owner") {
       const ownerId = req.user.id;
 
-      const owner = await userModel.findById({_id: ownerId})
+      const owner = await userModel.findById({ _id: ownerId });
 
-      if(!owner) {
-        return res.status(404).json({status: 404, message: "The owner not found"})
+      if (!owner) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "The owner not found" });
       }
 
       const property = await propertyModel.findById(id);
 
-      if(!property) {
+      if (!property) {
         return res.status(404).json({
           status: 404,
           message: "The Property not found",
@@ -176,12 +182,10 @@ export const deleteProperty = async (req, res) => {
         .status(200)
         .json({ status: 200, message: "Property deleted successfully" });
     } else {
-      res
-        .status(400)
-        .json({
-          status: 400,
-          message: "You are not authorized to delete a property",
-        });
+      res.status(403).json({
+        status: 403,
+        message: "You don't have permission",
+      });
     }
   } catch (error) {
     res.status(500).json({
@@ -198,63 +202,70 @@ export const sendRequest = async (req, res) => {
     const id = req.params.id;
     const role = req.user.role;
 
-    if(role === "renter") {
+    if (role === "renter") {
       const senderId = req.user.id;
 
-      const sender = await userModel.findById({_id: senderId})
+      const sender = await userModel.findById({ _id: senderId });
 
-      if(!sender) {
-        return res.status(404).json({status: 404, message: "The user sender request not found"})
+      if (!sender) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "The user sender request not found" });
       }
 
       const property = await propertyModel.findById(id).populate("owner");
-  
+
       if (!property) {
         return res
           .status(404)
           .json({ status: 404, message: "The Property not found" });
       }
-  
+
       if (property.owner.id === senderId) {
         return res
           .status(400)
           .json({ status: 400, message: "The Request was not sent!" });
       }
 
-      if(property.available === false ) {
-        return res.status(400).json({status: 400, message: "The property is currently unavailable"})
+      if (property.available === false) {
+        return res.status(400).json({
+          status: 400,
+          message: "The property is currently unavailable",
+        });
       }
-  
+
       const existingRequest = await requestModel.findOne({
         property: property._id,
         sender: senderId,
       });
-  
+
       if (existingRequest) {
         return res.status(400).json({
           status: 409,
           message: "The Request has already been sent this property",
         });
       }
-  
+
       const newRequest = await requestModel.create({
         property: property._id,
         sender: senderId,
       });
-  
+
       if (!newRequest) {
         return res
           .status(400)
           .json({ status: 400, message: "The Request was not sent!" });
       }
-  
+
       await newRequest.save();
-  
+
       res
         .status(200)
         .json({ status: 200, message: "The Request was sent successfully" });
     } else {
-      res.status(400).json({status: 400, message: "You are not authorized to send request a property"})
+      res
+        .status(403)
+        .json({ status: 403, message: "You don't have permission" });
     }
   } catch (error) {
     res.status(500).json({
@@ -295,56 +306,64 @@ export const getRequests = async (req, res) => {
 // Approve to requests - POST
 export const approveToRequest = async (req, res) => {
   try {
-   const role = req.user.role;
+    const role = req.user.role;
 
-   if(role === "owner") {
-    const id = req.params.id;
-    const ownerId = req.user.id
+    if (role === "owner") {
+      const id = req.params.id;
+      const ownerId = req.user.id;
 
-    const request = await requestModel.findById(id).populate("property");
+      const request = await requestModel.findById(id).populate("property");
 
-    if (!request) {
-      return res
-        .status(404)
-        .json({ status: 404, message: "The Requests not found" });
-    }
+      if (!request) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "The Requests not found" });
+      }
 
-    if(request.property.owner.toString() !== ownerId) {
-      return res.status(400).json({status: 400, message: "You are not authorized to approve request this a property"})
-    }
+      if (request.property.owner.toString() !== ownerId) {
+        return res.status(400).json({
+          status: 400,
+          message: "You are not authorized to approve request this a property",
+        });
+      }
 
-    if (request.isApproved === true) {
-      return res.status(409).json({
-        status: 409,
-        message: "The request has already been approved.",
+      if (request.isApproved === true) {
+        return res.status(409).json({
+          status: 409,
+          message: "The request has already been approved.",
+        });
+      }
+
+      const newTransaction = new transactionModel({
+        request: request._id,
       });
+
+      if (!newTransaction) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "The Request was not approved!" });
+      }
+
+      await newTransaction.save();
+
+      // Update the property availability
+      await propertyModel.findByIdAndUpdate(
+        { _id: request.property._id },
+        { available: false }
+      );
+
+      // Update the request to mark it as approved
+      await requestModel.findByIdAndUpdate({ _id: id }, { isApproved: true });
+
+      res.status(200).json({
+        status: 200,
+        message: "The request has been successfully approved ",
+      });
+    } else {
+      res
+        .status(403)
+        .json({ status: 403, message: "You don't have permission" });
     }
-
-    const newTransaction = new transactionModel({
-      request: request._id,
-    });
-
-    if (!newTransaction) {
-      return res
-        .status(400)
-        .json({ status: 400, message: "The Request was not approved!" });
-    }
-
-    await newTransaction.save();
-
-    // Update the property availability
-    await propertyModel.findByIdAndUpdate({ _id: request.property._id }, { available: false })
-
-    // Update the request to mark it as approved
-    await requestModel.findByIdAndUpdate({ _id: id }, { isApproved: true });
-
-    res.status(200).json({
-      status: 200,
-      message: "The request has been successfully approved ",
-    });
-   } else {
-    res.status(400).json({status: 400, message: "You are not authorized to approve request a property"})
-   }
   } catch (error) {
     res.status(500).json({
       status: 500,
@@ -375,6 +394,105 @@ export const getTransactions = async (req, res) => {
     }
 
     res.status(200).json(transactions);
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+// Send Message - POST
+export const sendMessage = async (req, res) => {
+  try {
+    const propertyId = req.params.propertyId;
+    const sender = req.user.id;
+    const role = req.user.role;
+
+    if (role === "renter") {
+      const { text } = req.body;
+
+      const newMessage = await messageModel({
+        text,
+        sender,
+        property: propertyId,
+      });
+
+      if (!newMessage) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Message not sent!" });
+      }
+
+      await newMessage.save();
+
+      res
+        .status(200)
+        .json({ status: 200, message: "Message sent successfully" });
+    } else {
+      res
+        .status(403)
+        .json({ status: 403, message: "You don't have permission" });
+    }
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+// Get Messages - GET
+export const getMessage = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const propertyId = req.params.propertyId;
+
+    const user = await userModel.findById(userId);
+
+    const messages = await messageModel
+      .find({ property: propertyId })
+      .populate([
+        { path: "sender", select: "name email" },
+        {
+          path: "property", select: "title",
+          populate: { path: "owner", select: "name email" },
+        },
+      ]);
+
+    if (messages.length === 0) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "messages not found" });
+    }
+
+    if (user.role === "renter") {
+      const filteredMessages = messages.filter(
+        (msg) => msg.sender._id.toString() === userId
+      );
+
+      if (filteredMessages.length === 0) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "messages not found" });
+      }
+
+      return res.status(200).json(filteredMessages);
+    } else {
+      const filteredMessages = messages.filter(
+        (msg) => msg.property.owner._id.toString() === userId
+      );
+
+      if (filteredMessages.length === 0) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "messages not found" });
+      }
+
+      return res.status(200).json(filteredMessages);
+    }
   } catch (error) {
     res.status(500).json({
       status: 500,

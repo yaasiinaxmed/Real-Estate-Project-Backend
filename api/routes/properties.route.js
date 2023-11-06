@@ -1,18 +1,32 @@
 import express from 'express'
-import { approveToRequest, createProperty, deleteProperty, getProperties, getRequests, getTransactions, sendRequest, updateProperty } from '../controllers/properties.controller.js'
+import { approveToRequest, createProperty, deleteProperty, getMessage, getProperties, getRequests, getTransactions, sendMessage, sendRequest, updateProperty } from '../controllers/properties.controller.js'
 import verifyToken from '../middleware/verifyToken.js'
 import validateProperty from '../middleware/ValidateProperty.js'
 
 const router = express.Router()
 
-// router endpoints
+// Property routers
 router.get("/", getProperties)
 router.post("/create", verifyToken, validateProperty ,createProperty)
 router.put("/update/:id", verifyToken, validateProperty, updateProperty)
 router.delete("/delete/:id", verifyToken, deleteProperty)
+
+// Send request - Route
 router.post("/:id/send_request", verifyToken, sendRequest)
+
+// Get requests - Route
 router.get("/requests", getRequests)
+
+// Approve to request - Route
 router.post("/requests/:id/approve", verifyToken, approveToRequest)
+
+// Get requests approved - Route
 router.get("/transactions", getTransactions)
+
+// Send Message - Route
+router.post("/:propertyId/send_message", verifyToken, sendMessage)
+
+// Get Messages - Route
+router.get("/:propertyId/messages", verifyToken, getMessage)
 
 export default router

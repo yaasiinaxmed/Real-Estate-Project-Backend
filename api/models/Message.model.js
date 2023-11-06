@@ -11,7 +11,9 @@ const messageSchema = new mongoose.Schema({
         required: true
     },
     property: {
-        type: mongoose.Types.ObjectId
+        type: mongoose.Types.ObjectId,
+        ref: "Property",
+        required: true
     }, 
     replies: [
         {
