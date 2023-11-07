@@ -17,7 +17,7 @@ This endpoint allows a new user to sign up for the real estate marketplace. It r
 
 | Parameter  | Type     | Required    | Description |
 |------------| -------- | ------------|-------------|
-| avater     | String   | No          | The image of the user |
+| avatar     | String   | No          | The image of the user |
 | name       | String   | Yes         | The name of the user |
 | email      | String   | Yes         | The email of the user |
 | role      | String   | Yes         | This field specifies the role or permission level of the user, it must be `owner` or `renter` |
@@ -152,7 +152,7 @@ This endpoint returns all the properties in the database using the property mode
 |------------| -------- | -------------- |-------------|
 | country    | String   | Filter by country | `/properties?country=USA` |
 | city    | String   | Filter by city | `/properties?city=New York` |
-| propertyType    | String   | Filter by property type | `/properties?propertyType=ApartmenA` |
+| propertyType    | String   | Filter by property type | `/properties?propertyType=Apartmen` |
 
 
 The endpoint will find all the properties in the database that match the query parameters using the property model. If there are properties found, it will return a JSON response with an array of properties and their fields:
@@ -291,7 +291,7 @@ Send a rental request for a property listing. This endpoint is accessible to use
 ```
 ### Get Requests - GET
 #### Endpoint: `/api/properties/requests`
-Retrieves a list of rental requests. Users with the "owner" role can view and approve requests.
+This endpoint allows the user to retrieve requests, which are filtered based on their role as either a renter or a property owner.
 
 #### Response
 
@@ -356,7 +356,7 @@ To approve a rental request, users with the "owner" role can access this endpoin
 ```
 ### Get Transactions - GET
 #### Endpoint: `/api/properties/transactions`
-Retrieve a list of rental transactions. Users with the "owner" role can view transaction details.
+This endpoint retrieves transactions that are filtered based on the user's role - either as a renter or a property owner.
 
 #### Response
 
@@ -406,14 +406,125 @@ Retrieve a list of rental transactions. Users with the "owner" role can view tra
 ]
 ```
 
+### Send Message - POST
+#### Endpoint: `/api/properties/:id/send_message`
+A renter can send a message about a specific property using this endpoint.
+
+#### Request Parameters
+
+| Parameter       | Type    | Required | Description                              |
+| --------------- | ------- | -------- | ---------------------------------------- |
+| id   | String | Yes      | ID of the property to send the message for. |
+
+#### Response
+
+```json
+{
+  "status" : 200,
+  "message": "message sent successfully"
+}
+```
+
+### Get Messages - GET
+#### Endpoint: `/api/properties/:id/messages`
+Retrieves messages related to a property, filtered by the user's role (renter or property owner).
+
+#### Request Parameters
+
+| Parameter       | Type    | Required | Description                              |
+| --------------- | ------- | -------- | ---------------------------------------- |
+| id   | String | Yes      | ID of the property to send the message for. |
+
+#### Response
+
+```json
+[
+{
+    "_id": "6549e69d6d78d6d45de34030",
+    "text": "asc",
+    "sender": {
+      "_id": "6548d947127413f8e5511192",
+      "name": "yasika",
+      "email": "yaskassoy121@gmail.com"
+    },
+    "property": {
+      "_id": "6546920bebdc9b145803e121",
+      "title": "Spacious apartment in downtown",
+      "owner": {
+        "_id": "65467f7adf87a8c9c5da32fa",
+        "name": "Yaasiin Ahmed",
+        "email": "yaskassoy@gmail.com"
+      }
+    },
+    "replies": [],
+    "createdAt": "2023-11-07T07:26:21.569Z",
+    "updatedAt": "2023-11-07T07:26:21.569Z",
+    "__v": 0
+  }
+   ...
+ ]
+```
+If there are no requests found, it will return a JSON response with the status code `404` and a message `messages not found`
+
+### Send Reply - POST
+#### Endpoint: `/api/properties/messages/:id/send_reply`
+A renter can send a message about a specific property using this endpoint.
+
+#### Request Parameters
+
+| Parameter       | Type    | Required | Description                              |
+| --------------- | ------- | -------- | ---------------------------------------- |
+| id   | String | Yes      |ID of the message to send a reply to. |
+
+#### Response
+
+```json
+{
+  "status" : 200,
+  "message": "reply sent successfully"
+}
+```
+
+### Get Replies - GET
+#### Endpoint: `/api/properties/:id/messages`
+Retrieves replies related to a specific message, filtering based on user involvement.
+
+#### Request Parameters
+
+| Parameter       | Type    | Required | Description                              |
+| --------------- | ------- | -------- | ---------------------------------------- |
+| id   | String | Yes      | ID of the message to retrieve replies for.|
+
+#### Response
+
+```json
+[
+ {
+    "_id": "6549be859c35facbe4e229a5",
+    "text": "wcs",
+    "sender": {
+      "_id": "65467f7adf87a8c9c5da32fa",
+      "name": "Yaasiin Ahmed",
+      "email": "yaskassoy@gmail.com"
+    },
+    "message": "6548d967127413f8e5511195",
+    "createdAt": "2023-11-07T04:35:17.951Z",
+    "updatedAt": "2023-11-07T04:35:17.951Z",
+    "__v": 0
+  }
+   ...
+ ]
+```
+If there are no requests found, it will return a JSON response with the status code `404` and a message `replies not found`
+
 ### Possible error messages:
 - `Authentication required`: The request requires authentication, but the user is not authenticated.
 - `Invalid token`: The provided token is invalid or expired.
-- `Request already sent for this property`: The authenticated user has already sent a request to move into the requested property.
-- `Request was not sent!`: The owner of the property is the same as the person who is sending the request.
-- `Request has already been approved`: The property has already been approved by the owner
-- `Role must be owner or renter`: This field specifies the role or permission level of the user, it must be `owner` or `renter`
-- `You are not authorized to create a property`: The action of creating a property is not authorized unless one holds the `owner` role.
-- `You do not own this property`: It seems that you are not the rightful owner of this property.
-- `The property is currently unavailable`: that means the property is not available at this time.
+- `Request already sent for this property`: When a user with the "renter" role tries to send a rental request for a property they have already requested, this error is returned.
+- `Request was not sent!`: If the owner of the property is the same as the person who is trying to send the request, this error is returned.
+- `Request has already been approved`: If a user attempts to approve a rental request for a property that has already been approved by the owner, this error is returned.
+- `Role must be owner or renter`:  This error occurs when a user tries to create an account with a role other than "owner" or "renter." The role must be one of these two values.
+- `You don't have permission`: This error indicates that the user does not have the necessary authorization or permission to perform a specific action, possibly due to their role or the type of request.
+- `You do not own this property`:  When a user attempts to act on a property they don't own, this error is returned. It signifies that the user lacks ownership of the property.
+- `The property is currently unavailable`:  If a user attempts to send a rental request for a property that is not available at the moment, they receive this error.
 - `Internal Server Error`: An internal server error occurred.
