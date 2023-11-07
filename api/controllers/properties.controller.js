@@ -4,6 +4,7 @@ import transactionModel from "../models/transactions.model.js";
 import userModel from "../models/user.model.js";
 import messageModel from "../models/Message.model.js";
 import replyModel from "../models/Reply.model.js";
+import { request } from "express";
 
 // Get Properties and search filter - GET
 export const getProperties = async (req, res) => {
@@ -289,6 +290,9 @@ export const sendRequest = async (req, res) => {
 // Get Requests - GET
 export const getRequests = async (req, res) => {
   try {
+    const userId = req.user.id
+    const role = req.user.role
+
     const requests = await requestModel.find().populate([
       { path: "sender", select: "name email" },
       {
@@ -303,7 +307,31 @@ export const getRequests = async (req, res) => {
         .json({ status: 404, message: "The Requests not found" });
     }
 
-    res.status(200).json(requests);
+    // Check if the user is the renter
+    if(role === "renter") {
+
+      const filteredRequests = requests.filter(request => request.sender._id.toString() === userId)
+
+      if(filteredRequests.length === 0) {
+        return res
+        .status(404)
+        .json({ status: 404, message: "Requests not found" });
+      }
+
+      return res.status(200).json(filteredRequests)
+    } else {
+
+      const filteredRequests = requests.filter(request => request.property.owner._id.toString() === userId)
+
+      if(filteredRequests.length === 0) {
+        return res
+        .status(404)
+        .json({ status: 404, message: "Requests not found" });
+      }
+
+      return res.status(200).json(filteredRequests)
+    }
+
   } catch (error) {
     res.status(500).json({
       status: 500,
@@ -387,6 +415,9 @@ export const approveToRequest = async (req, res) => {
 // Get Transactions - GET
 export const getTransactions = async (req, res) => {
   try {
+    const userId = req.user.id
+    const role = req.user.role
+
     const transactions = await transactionModel.find().populate({
       path: "request",
       populate: [
@@ -404,7 +435,31 @@ export const getTransactions = async (req, res) => {
         .json({ status: 404, message: "Transactions not found" });
     }
 
-    res.status(200).json(transactions);
+     // Check if the user is the renter
+    if(role === "renter") {
+
+      const filteredTransactions = transactions.filter(trns => trns.request.sender._id.toString() === userId)
+
+      if(filteredTransactions.length === 0) {
+        return res
+        .status(404)
+        .json({ status: 404, message: "Transactions not found" });
+      }
+
+      return res.status(200).json(filteredTransactions)
+    } else {
+
+      const filteredTransactions = transactions.filter(trns => trns.request.property.owner._id.toString() === userId)
+
+      if(filteredTransactions.length === 0) {
+        return res
+        .status(404)
+        .json({ status: 404, message: "Transactions not found" });
+      }
+
+      return res.status(200).json(filteredTransactions)
+    }
+
   } catch (error) {
     res.status(500).json({
       status: 500,
