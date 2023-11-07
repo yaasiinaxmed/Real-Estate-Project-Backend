@@ -10,7 +10,7 @@ const SECRET_KEY = process.env.SECRET_KEY
 // Sign Up - POST
 export const signup = async (req, res, next) => {
     try {
-        const {name, email, role, password} = req.body
+        const {name, email, role, avatar,password} = req.body
 
         const user = await userModel.findOne({email})
 
@@ -21,6 +21,7 @@ export const signup = async (req, res, next) => {
         const hashedPassword = await bcrypt.hash(password, 10)
 
         const newUser = new userModel({
+            avatar,
             name,
             email,
             role,

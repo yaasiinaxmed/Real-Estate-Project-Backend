@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 mongoose.options.strictPopulate = false;
 
 const userSchema = new mongoose.Schema({
-    avater: {
+    avatar: {
         type: String,
         default: "https://t4.ftcdn.net/jpg/03/32/59/65/360_F_332596535_lAdLhf6KzbW6PWXBWeIFTovTii1drkbT.jpg"
     },
