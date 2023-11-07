@@ -1,5 +1,5 @@
 import express from 'express'
-import { approveToRequest, createProperty, deleteProperty, getMessage, getProperties, getRequests, getTransactions, sendMessage, sendRequest, updateProperty } from '../controllers/properties.controller.js'
+import { approveToRequest, createProperty, deleteProperty, getMessage, getProperties, getReplies, getRequests, getTransactions, sendMessage, sendReply, sendRequest, updateProperty } from '../controllers/properties.controller.js'
 import verifyToken from '../middleware/verifyToken.js'
 import validateProperty from '../middleware/ValidateProperty.js'
 
@@ -24,9 +24,15 @@ router.post("/requests/:id/approve", verifyToken, approveToRequest)
 router.get("/transactions", getTransactions)
 
 // Send Message - Route
-router.post("/:propertyId/send_message", verifyToken, sendMessage)
+router.post("/:id/send_message", verifyToken, sendMessage)
 
 // Get Messages - Route
-router.get("/:propertyId/messages", verifyToken, getMessage)
+router.get("/:id/messages", verifyToken, getMessage)
+
+// Send Reply - Route
+router.post("/messages/:id/send_reply", verifyToken, sendReply )
+
+// Get Replies - Route
+router.get("/messages/:id/replies", verifyToken, getReplies )
 
 export default router

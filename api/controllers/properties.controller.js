@@ -3,6 +3,7 @@ import requestModel from "../models/request.model.js";
 import transactionModel from "../models/transactions.model.js";
 import userModel from "../models/user.model.js";
 import messageModel from "../models/Message.model.js";
+import replyModel from "../models/Reply.model.js";
 
 // Get Properties and search filter - GET
 export const getProperties = async (req, res) => {
@@ -35,6 +36,7 @@ export const createProperty = async (req, res) => {
     const ownerId = req.user.id;
     const role = req.user.role;
 
+     // Check if the user is the owner
     if (role === "owner") {
       const owner = await userModel.findById({ _id: ownerId });
 
@@ -81,6 +83,7 @@ export const updateProperty = async (req, res) => {
     const id = req.params.id;
     const role = req.user.role;
 
+     // Check if the user is the owner
     if (role === "owner") {
       const ownerId = req.user.id;
 
@@ -143,9 +146,11 @@ export const deleteProperty = async (req, res) => {
     const id = req.params.id;
     const role = req.user.role;
 
+     // Check if the user is the owner
     if (role === "owner") {
       const ownerId = req.user.id;
 
+      // Check if the owner exists
       const owner = await userModel.findById({ _id: ownerId });
 
       if (!owner) {
@@ -182,6 +187,7 @@ export const deleteProperty = async (req, res) => {
         .status(200)
         .json({ status: 200, message: "Property deleted successfully" });
     } else {
+      // Permission denied for non-owners
       res.status(403).json({
         status: 403,
         message: "You don't have permission",
@@ -202,9 +208,11 @@ export const sendRequest = async (req, res) => {
     const id = req.params.id;
     const role = req.user.role;
 
+     // Check if the user is the renter
     if (role === "renter") {
       const senderId = req.user.id;
 
+      // Check if the sender exists
       const sender = await userModel.findById({ _id: senderId });
 
       if (!sender) {
@@ -213,6 +221,7 @@ export const sendRequest = async (req, res) => {
           .json({ status: 404, message: "The user sender request not found" });
       }
 
+       // Find the property by ID and populate owner information
       const property = await propertyModel.findById(id).populate("owner");
 
       if (!property) {
@@ -234,6 +243,7 @@ export const sendRequest = async (req, res) => {
         });
       }
 
+       // Check if there is an existing request for this property and sender
       const existingRequest = await requestModel.findOne({
         property: property._id,
         sender: senderId,
@@ -308,6 +318,7 @@ export const approveToRequest = async (req, res) => {
   try {
     const role = req.user.role;
 
+    // Check if the user is the owner
     if (role === "owner") {
       const id = req.params.id;
       const ownerId = req.user.id;
@@ -406,7 +417,7 @@ export const getTransactions = async (req, res) => {
 // Send Message - POST
 export const sendMessage = async (req, res) => {
   try {
-    const propertyId = req.params.propertyId;
+    const propertyId = req.params.id;
     const sender = req.user.id;
     const role = req.user.role;
 
@@ -448,18 +459,19 @@ export const sendMessage = async (req, res) => {
 export const getMessage = async (req, res) => {
   try {
     const userId = req.user.id;
-    const propertyId = req.params.propertyId;
-
-    const user = await userModel.findById(userId);
+    const propertyId = req.params.id;
+    const role = req.user.role;
 
     const messages = await messageModel
       .find({ property: propertyId })
       .populate([
         { path: "sender", select: "name email" },
         {
-          path: "property", select: "title",
+          path: "property",
+          select: "title",
           populate: { path: "owner", select: "name email" },
         },
+        { path: "replies"}
       ]);
 
     if (messages.length === 0) {
@@ -468,7 +480,8 @@ export const getMessage = async (req, res) => {
         .json({ status: 404, message: "messages not found" });
     }
 
-    if (user.role === "renter") {
+     // Check if the user is the renter
+    if (role === "renter") {
       const filteredMessages = messages.filter(
         (msg) => msg.sender._id.toString() === userId
       );
@@ -493,6 +506,119 @@ export const getMessage = async (req, res) => {
 
       return res.status(200).json(filteredMessages);
     }
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+// Send Reply - POST
+export const sendReply = async (req, res) => {
+  try {
+    const sender = req.user.id;
+    const role = req.user.role;
+    const id = req.params.id;
+
+     // Check if the user is the owner
+    if (role === "owner") {
+      const { text } = req.body;
+
+      const messages = await messageModel.findById(id).populate([
+        { path: "sender", select: "name email" },
+        {
+          path: "property",
+          select: "title",
+          populate: { path: "owner", select: "name email" },
+        },
+      ]);
+
+      if (!messages) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "Messages not found" });
+      }
+
+      if (messages.property.owner._id.toString() !== sender) {
+        return res.status(400).json({
+          status: 400,
+          message: "You are not authorized to send reply this a message",
+        });
+      }
+
+      const newReply = await replyModel({
+        text,
+        sender,
+        message: id,
+      });
+
+      await newReply.save();
+
+      const message = await messageModel.findById(id);
+      message.replies.push(newReply._id);
+
+      await message.save();
+
+      res.status(200).json({ status: 200, message: "Reply sent successfully" });
+    } else {
+      return res
+        .status(403)
+        .json({ status: 403, message: "You don't have permission" });
+    }
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+// Get Replies - GET
+export const getReplies = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const messageId = req.params.id;
+
+    const message = await messageModel.findById(messageId).populate({
+      path: "replies",
+      populate: {
+        path: "sender",
+        select: "name email",
+      },
+    });
+
+    if (!message) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "message not found" });
+    }
+
+    // Check if the current user is the sender of the message
+    if (userId === message.sender) {
+      return res.status(200).json(message.replies);
+    }
+
+    // Check if the current user is the sender of any reply
+    const filteredReplies = message.replies.filter(
+      (reply) => reply.sender._id.toString() === userId
+    );
+
+    if (filteredReplies.length === 0) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "replies not found" });
+    }
+
+    if (!filteredReplies) {
+      return res
+        .status(403)
+        .json({ status: 403, message: "You don't have permission" });
+    }
+
+    return res.status(200).json(filteredReplies);
   } catch (error) {
     res.status(500).json({
       status: 500,
