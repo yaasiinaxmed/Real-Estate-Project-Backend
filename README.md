@@ -1,15 +1,20 @@
 # Real Estate Marketplace API
 ## Introduction
-The Real Estate Marketplace API is a RESTful web service that allows users to create, read, update, and delete properties in a online marketplace. Users can also sign up, log in, and send requests to owners. 
+If you're here, you're about to explore some of the great features of the Marketplace API! This API enables users to do various things in the online real estate market. You can create, read, update, and delete properties. Additionally, you can register, log in, and even ask property owners questions. There's a lot more to discover too! Let's get started
 
 ## Authentication
 This API uses JSON Web Tokens `JWT` for authentication. To access protected endpoints, include the `Authorization` header in your requests with the value `Bearer <token>`, where `<token>` is the JWT obtained during the login process.
 
-### The base URL for the API is:
+## Base URL
 `https://real-estate-marketplace-0vnt.onrender.com/`
 
-##### The API has two main controllers:
- the user controller and the property controller. The user controller handles the operations related to users, such as signing up, logging in, and updating or deleting their accounts. The property controller handles the operations related to properties, such as creating, reading, updating, or deleting properties, sending requests to owners, approving requests, and getting transactions.
+## Controllers
+
+The API revolves around two main controllers: the user controller and the property controller.
+
+- **User Controller:** Manages user-related operations such as signing up, logging in, updating, or deleting user accounts.
+    
+- **Property Controller:** Handles property-related operations, including creating, reading, updating, or deleting properties, sending and approving requests, and managing transactions.
 
 ### User Sign Up - POST
 #### Endpoint: `/api/users/signup`
