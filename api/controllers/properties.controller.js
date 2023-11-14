@@ -4,7 +4,6 @@ import transactionModel from "../models/transactions.model.js";
 import userModel from "../models/user.model.js";
 import messageModel from "../models/Message.model.js";
 import replyModel from "../models/Reply.model.js";
-import { request } from "express";
 
 // Get Properties and search filter - GET
 export const getProperties = async (req, res) => {
@@ -13,7 +12,7 @@ export const getProperties = async (req, res) => {
 
     const properties = await propertyModel
       .find(search)
-      .populate("owner", "name email");
+      .populate("owner", "name email avatar");
 
     if (properties.length === 0) {
       return res
@@ -294,10 +293,10 @@ export const getRequests = async (req, res) => {
     const role = req.user.role
 
     const requests = await requestModel.find().populate([
-      { path: "sender", select: "name email" },
+      { path: "sender", select: "name email avatar" },
       {
         path: "property",
-        populate: { path: "owner", select: "name email" },
+        populate: { path: "owner", select: "name email avatar" },
       },
     ]);
 
@@ -421,10 +420,10 @@ export const getTransactions = async (req, res) => {
     const transactions = await transactionModel.find().populate({
       path: "request",
       populate: [
-        { path: "sender", select: "name email" },
+        { path: "sender", select: "name email avatar" },
         {
           path: "property",
-          populate: { path: "owner", select: "name email" },
+          populate: { path: "owner", select: "name email avatar" },
         },
       ],
     });
@@ -520,11 +519,11 @@ export const getMessage = async (req, res) => {
     const messages = await messageModel
       .find({ property: propertyId })
       .populate([
-        { path: "sender", select: "name email" },
+        { path: "sender", select: "name email avatar" },
         {
           path: "property",
           select: "title",
-          populate: { path: "owner", select: "name email" },
+          populate: { path: "owner", select: "name email avatar" },
         },
         { path: "replies"}
       ]);
@@ -582,11 +581,11 @@ export const sendReply = async (req, res) => {
       const { text } = req.body;
 
       const messages = await messageModel.findById(id).populate([
-        { path: "sender", select: "name email" },
+        { path: "sender", select: "name email avatar" },
         {
           path: "property",
           select: "title",
-          populate: { path: "owner", select: "name email" },
+          populate: { path: "owner", select: "name email avatar" },
         },
       ]);
 
@@ -641,7 +640,7 @@ export const getReplies = async (req, res) => {
       path: "replies",
       populate: {
         path: "sender",
-        select: "name email",
+        select: "name email avatar",
       },
     });
 

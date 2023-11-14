@@ -10,6 +10,7 @@ const validateProperty = async (req, res, next) => {
     await check("city", "city is required").notEmpty().run(req)
     await check("address", "address is required").notEmpty().run(req)
     await check("propertyType", "PropertyType is required").notEmpty().run(req)
+    await check("imageUrl", "image Url is required").notEmpty().run(req)
     await check("type", "Type is required").notEmpty().run(req)
 
     const errors = validationResult(req)
