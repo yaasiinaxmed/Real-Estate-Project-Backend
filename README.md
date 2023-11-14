@@ -1,15 +1,20 @@
 # Real Estate Marketplace API
 ## Introduction
-The Real Estate Marketplace API is a RESTful web service that allows users to create, read, update, and delete properties in a online marketplace. Users can also sign up, log in, and send requests to owners. 
+If you're here, you're about to explore some of the great features of the Marketplace API! This API enables users to do various things in the online real estate market. You can create, read, update, and delete properties. Additionally, you can register, log in, and even ask property owners questions. There's a lot more to discover too! Let's get started
 
 ## Authentication
 This API uses JSON Web Tokens `JWT` for authentication. To access protected endpoints, include the `Authorization` header in your requests with the value `Bearer <token>`, where `<token>` is the JWT obtained during the login process.
 
-### The base URL for the API is:
+## Base URL
 `https://real-estate-marketplace-0vnt.onrender.com/`
 
-##### The API has two main controllers:
- the user controller and the property controller. The user controller handles the operations related to users, such as signing up, logging in, and updating or deleting their accounts. The property controller handles the operations related to properties, such as creating, reading, updating, or deleting properties, sending requests to owners, approving requests, and getting transactions.
+## Controllers
+
+The API revolves around two main controllers: the user controller and the property controller.
+
+- **User Controller:** Manages user-related operations such as signing up, logging in, updating, or deleting user accounts.
+    
+- **Property Controller:** Handles property-related operations, including creating, reading, updating, or deleting properties, sending and approving requests, and managing transactions.
 
 ### User Sign Up - POST
 #### Endpoint: `/api/users/signup`
@@ -159,29 +164,30 @@ The endpoint will find all the properties in the database that match the query p
 
 ``` json
 [
- {
-  "_id": "6540c31fadc3a01af827c915",
-  "title": "Villa 2",
-  "description": "This beautiful 3 bedroom home is located in a quiet neighborhood and is close to schools, parks, and shopping.",
-  "price": 12000,
-  "bedrooms": 5,
-  "bathrooms": 2,
-  "country": "USA",
-  "city": "Boynton Beach",
-  "address": "3896 Mulberry Lane",
-  "propertyType": "Single-family home",
-  "type": "for rent",
-  "owner": {
-    "_id": "653bd7ba3a1dd048ab6b094c",
-    "name": "Yaasiin Ahmed",
-    "email": "yaskassoy@gmail.com"
-  },
-  "available": true,
-  "createdAt": "2023-10-31T09:04:32.001Z",
-  "updatedAt": "2023-10-31T09:04:32.001Z",
-  "__v": 0
-}
- ...
+    {
+        "_id": "655354967ddb3a85b5cef82a",
+        "title": "Spacious apartment in downtown",
+        "description": "A beautiful and modern apartment with 3 bedrooms and 2 bathrooms, located in the heart of the city. ",
+        "price": 1500,
+        "bedrooms": 3,
+        "bathrooms": 2,
+        "country": "USA",
+        "city": "Boynton Beach",
+        "address": "3896 Mulberry Lane",
+        "propertyType": "Single-family home",
+        "imageUrl": "https://res.cloudinary.com/dcdhklrjc/image/upload/v1692612598/wwcrlzgwx04egdadyvbg.png",
+        "type": "for rent",
+        "owner": {
+            "_id": "6553508845dab501df30d16b",
+            "name": "Yaasiin Ahmed",
+            "email": "yaskassoy@gmail.com"
+        },
+        "available": true,
+        "createdAt": "2023-11-14T11:05:59.025Z",
+        "updatedAt": "2023-11-14T11:05:59.025Z",
+        "__v": 0
+    }
+    ...
 ]
 ```
 If there are no properties found, it will return a JSON response with the status code `404` and a message `Properties not found`
@@ -203,6 +209,7 @@ It requires the following parameters in the
 | city      | String   | Yes         |  The city of the country.|
 | address      | String   | Yes         | The address of the property.|
 | propertyType      | String   | Yes         |   The type of the property, such as apartment, house, villa, etc.|
+| imageUrl      | String   | No         |  The photo of the property |
 | type      | String   | Yes         |  The type of the transaction, such as rent or sale. |
 
 The endpoint will create a new property in the database using the property model with the provided parameters and the owner ID. If the property is created successfully, it will return a JSON response with the status code `200` and a message:
@@ -232,6 +239,7 @@ It requires the following parameters in the
 | city      | String   | No         |  The city of the country.|
 | address      | String   | No         | The address of the property.|
 | propertyType      | String   | No         |   The type of the property, such as apartment, house, villa, etc.|
+| imageUrl      | String   | No         |  The photo of the property |
 | type      | String   | No         |  The type of the transaction, such as rent or sale. |
 | id   | String | Yes     | ID of the property. |
 
@@ -297,42 +305,43 @@ This endpoint allows the user to retrieve requests, which are filtered based on 
 
 ```json
 [
-  {
-     "_id": "65408c57e537dc0e60b87cbd",
-     "property": {
-       "_id": "6540767990c590d80be8fff4",
-       "title": "Villa 2",
-       "description": "This beautiful 3 bedroom home is located in a quiet neighborhood and is close to schools, parks, and shopping.",
-       "price": 12000,
-       "bedrooms": 5,
-       "bathrooms": 2,
-       "country": "USA",
-     "city": "Boynton Beach",
-     "address": "3896 Mulberry Lane",
-     "propertyType": "Single-family home",
-       "type": "for rent",
-       "owner": {
-         "_id": "653bd7ba3a1dd048ab6b094c",
-         "name": "Yaasiin Ahmed",
-         "email": "yaskassoy@gmail.com"
-       },
-       "available": true,
-       "createdAt": "2023-10-31T03:37:29.598Z",
-       "updatedAt": "2023-10-31T03:37:29.598Z",
-       "__v": 0
-     },
-     "sender": {
-       "_id": "654077c5ccc3680bd822efb9",
-       "name": "Mohamed Abdi",
-       "email": "mohamed@gmail.com"
-     },
-     "isApproved": false,
-     "createdAt": "2023-10-31T05:10:47.168Z",
-     "updatedAt": "2023-10-31T05:19:13.396Z",
-     "__v": 0
-   }
-   ...
- ]
+    {
+        "_id": "655357567ddb3a85b5cef846",
+        "property": {
+            "_id": "655355c97ddb3a85b5cef835",
+            "title": "Cedar Ridge Ranch",
+            "description": "Massive opportunity to build your dream home at the base of Mummy Mountain in the 3 C's school district. Home is currently updated and very livable if your plans are to build at a later date.* Bonus * to live hillside without hillside restrictions in the town of PV. Run don't walk to capture this needle in a hay stack.",
+            "price": 1200,
+            "bedrooms": 5,
+            "bathrooms": 3,
+            "country": "US",
+            "city": "New York",
+            "address": "Street 2 ",
+            "propertyType": "House",
+            "imageUrl": "https://media.istockphoto.com/id/1184625380/photo/large-modern-expensive-home.jpg?s=612x612&w=0&k=20&c=TuX7dnAQvrxt02_BMnlgtVMMdvBLmh3gcXL1bPnobP8=",
+            "type": "for rent",
+            "owner": {
+                "_id": "6553508845dab501df30d16b",
+                "name": "Yaasiin Ahmed",
+                "email": "yaskassoy@gmail.com"
+            },
+            "available": true,
+            "createdAt": "2023-11-14T11:11:05.569Z",
+            "updatedAt": "2023-11-14T11:11:05.569Z",
+            "__v": 0
+        },
+        "sender": {
+            "_id": "6553571d7ddb3a85b5cef83f",
+            "name": "Mohamed Ahmed",
+            "email": "mohamed@gmail.com"
+        },
+        "isApproved": false,
+        "createdAt": "2023-11-14T11:17:42.995Z",
+        "updatedAt": "2023-11-14T11:17:42.995Z",
+        "__v": 0
+    }
+    ...
+]
 ```
 If there are no requests found, it will return a JSON response with the status code `404` and a message `Requests not found`
 
@@ -362,47 +371,48 @@ This endpoint retrieves transactions that are filtered based on the user's role 
 
 ```json
 [
-  {
-    "_id": "65408e50cdd1a60b730200f3",
-    "request": {
-      "_id": "65408c57e537dc0e60b87cbd",
-      "property": {
-        "_id": "6540767990c590d80be8fff4",
-        "title": "Villa 2",
-        "description": "This beautiful 3 bedroom home is located in a quiet neighborhood and is close to schools, parks, and shopping.",
-        "price": 12000,
-        "bedrooms": 5,
-        "bathrooms": 2,
-        "country": "USA",
-        "city": "Boynton Beach",
-        "address": "3896 Mulberry Lane",
-        "propertyType": "Single-family home",
-        "propertyType": "Single-family home",
-        "type": "for rent",
-        "owner": {
-          "_id": "653bd7ba3a1dd048ab6b094c",
-          "name": "yaskassoy2",
-          "email": "yaskassoy4@gmail.com"
+    {
+        "_id": "65535a3de45b35b6b1bd0201",
+        "request": {
+            "_id": "655357567ddb3a85b5cef846",
+            "property": {
+                "_id": "655355c97ddb3a85b5cef835",
+                "title": "Cedar Ridge Ranch",
+                "description": "Massive opportunity to build your dream home at the base of Mummy Mountain in the 3 C's school district. Home is currently updated and very livable if your plans are to build at a later date.* Bonus * to live hillside without hillside restrictions in the town of PV. Run don't walk to capture this needle in a hay stack.",
+                "price": 1200,
+                "bedrooms": 5,
+                "bathrooms": 3,
+                "country": "US",
+                "city": "New York",
+                "address": "Street 2 ",
+                "propertyType": "House",
+                "imageUrl": "https://media.istockphoto.com/id/1184625380/photo/large-modern-expensive-home.jpg?s=612x612&w=0&k=20&c=TuX7dnAQvrxt02_BMnlgtVMMdvBLmh3gcXL1bPnobP8=",
+                "type": "for rent",
+                "owner": {
+                    "_id": "6553508845dab501df30d16b",
+                    "name": "Yaasiin Ahmed",
+                    "email": "yaskassoy@gmail.com"
+                },
+                "available": false,
+                "createdAt": "2023-11-14T11:11:05.569Z",
+                "updatedAt": "2023-11-14T11:30:05.483Z",
+                "__v": 0
+            },
+            "sender": {
+                "_id": "6553571d7ddb3a85b5cef83f",
+                "name": "Mohamed Ahmed",
+                "email": "mohamed@gmail.com"
+            },
+            "isApproved": true,
+            "createdAt": "2023-11-14T11:17:42.995Z",
+            "updatedAt": "2023-11-14T11:30:05.750Z",
+            "__v": 0
         },
-        "available": false,
-        "createdAt": "2023-10-31T03:37:29.598Z",
-        "updatedAt": "2023-10-31T03:37:29.598Z",
+        "createdAt": "2023-11-14T11:30:05.240Z",
+        "updatedAt": "2023-11-14T11:30:05.240Z",
         "__v": 0
-      },
-      "sender": {
-        "_id": "654077c5ccc3680bd822efb9",
-        "name": "Yaasiin Ahmed",
-        "email": "yaskassoy2@gmail.com"
-      },
-      "isApproved": true,
-      "createdAt": "2023-10-31T05:10:47.168Z",
-      "updatedAt": "2023-10-31T05:19:13.396Z",
-      "__v": 0
-    },
-    "createdAt": "2023-10-31T05:19:13.002Z",
-    "updatedAt": "2023-10-31T05:19:13.002Z",
-    "__v": 0
-  }
+    }
+    ...
 ]
 ```
 
