@@ -11,7 +11,7 @@ export const getProperties = async (req, res) => {
     const search = req.query;
 
     const properties = await propertyModel
-      .find(search)
+      .find(search).sort({ createdAt: -1 })
       .populate("owner", "name email avatar");
 
     if (properties.length === 0) {
@@ -29,6 +29,7 @@ export const getProperties = async (req, res) => {
     });
   }
 };
+
 
 // create property - POST
 export const createProperty = async (req, res) => {
