@@ -111,14 +111,31 @@ export const userUpdate = async (req, res) => {
 
         const userId = req.user.id
         const {name, email, avatar} = req.body
+
+          // Check if the avatar is the only field being updated
+          if(avatar && !name && !email) {
+            const updatedUser = await userModel.findByIdAndUpdate(
+                {_id: userId},
+                {avatar: avatar},
+                { new: true}
+            )
+
+            if(!updatedUser) {
+                return res.status(400).json({ status: 400, message: "User avatar was not updated!" });
+            }
+
+            res.status(200).json({ status: 200, message: "User avatar updated successfully"})
+          }
         
+        // If other fields are being updated along with the avatar
         const updatedUser = await userModel.findByIdAndUpdate(
             {_id: userId},
             {
                 name: name,
                 email: email,
                 avatar: avatar
-            }
+            },
+            { new: true } // Return the updated user
         )
 
         if(!updatedUser) {
