@@ -10,7 +10,7 @@ const SECRET_KEY = process.env.SECRET_KEY
 // Sign Up - POST
 export const signup = async (req, res, next) => {
     try {
-        const {name, email, role, avatar,password} = req.body
+        const {name, email, role, avatar, password} = req.body
 
         const user = await userModel.findOne({email})
 
@@ -110,13 +110,14 @@ export const userUpdate = async (req, res) => {
     try {
 
         const userId = req.user.id
-        const {name, email} = req.body
+        const {name, email, avatar} = req.body
         
         const updatedUser = await userModel.findByIdAndUpdate(
             {_id: userId},
             {
                 name: name,
                 email: email,
+                avatar: avatar
             }
         )
 
