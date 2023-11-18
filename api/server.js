@@ -12,7 +12,10 @@ server.use(express.json())
 server.use(cors())
 
 // connect mongoDB
-mongoose.connect(process.env.DATABASE_URL).then(() => {
+mongoose.connect(process.env.DATABASE_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+}).then(() => {
     console.log("Connected MongoDB")
 }).catch((error) => {
     console.log("Connecting MongoDB Error:", error)
