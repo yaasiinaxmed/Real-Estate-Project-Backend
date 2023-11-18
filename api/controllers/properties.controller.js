@@ -293,7 +293,7 @@ export const getRequests = async (req, res) => {
     const userId = req.user.id
     const role = req.user.role
 
-    const requests = await requestModel.find().populate([
+    const requests = await requestModel.find().sort({createdAt: -1}).populate([
       { path: "sender", select: "name email avatar" },
       {
         path: "property",
@@ -418,7 +418,7 @@ export const getTransactions = async (req, res) => {
     const userId = req.user.id
     const role = req.user.role
 
-    const transactions = await transactionModel.find().populate({
+    const transactions = await transactionModel.find().sort({ createdAt: -1 }).populate({
       path: "request",
       populate: [
         { path: "sender", select: "name email avatar" },
@@ -518,7 +518,7 @@ export const getMessage = async (req, res) => {
     const role = req.user.role;
 
     const messages = await messageModel
-      .find({ property: propertyId })
+      .find({ property: propertyId }).sort({ createdAt: -1 })
       .populate([
         { path: "sender", select: "name email avatar" },
         {
@@ -637,7 +637,7 @@ export const getReplies = async (req, res) => {
     const userId = req.user.id;
     const messageId = req.params.id;
 
-    const message = await messageModel.findById(messageId).populate({
+    const message = await messageModel.findById(messageId).sort({ createdAt: -1 }).populate({
       path: "replies",
       populate: {
         path: "sender",
