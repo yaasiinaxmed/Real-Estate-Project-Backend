@@ -114,7 +114,8 @@ export const updateProperty = async (req, res) => {
 
       const updatedProperty = await propertyModel.findByIdAndUpdate(
         { _id: id },
-        { ...req.body }
+        { $set: req.body},
+        { new: true}
       );
 
       if (!updatedProperty) {
