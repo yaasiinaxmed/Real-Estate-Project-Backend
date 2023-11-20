@@ -6,7 +6,7 @@ If you're here, you're about to explore some of the great features of the Market
 This API uses JSON Web Tokens `JWT` for authentication. To access protected endpoints, include the `Authorization` header in your requests with the value `Bearer <token>`, where `<token>` is the JWT obtained during the login process.
 
 ## Base URL
-`https://real-estate-marketplace-0vnt.onrender.com/`
+[`https://real-estate-marketplace-0vnt.onrender.com/`](https://real-estate-marketplace-0vnt.onrender.com/)
 
 ## Controllers
 
