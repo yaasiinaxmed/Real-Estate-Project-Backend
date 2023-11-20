@@ -11,7 +11,8 @@ export const getProperties = async (req, res) => {
     const search = req.query;
 
     const properties = await propertyModel
-      .find(search).sort({ createdAt: -1 })
+      .find(search)
+      .sort({ createdAt: -1 })
       .populate("owner", "name email avatar");
 
     if (properties.length === 0) {
@@ -30,14 +31,13 @@ export const getProperties = async (req, res) => {
   }
 };
 
-
 // create property - POST
 export const createProperty = async (req, res) => {
   try {
     const ownerId = req.user.id;
     const role = req.user.role;
 
-     // Check if the user is the owner
+    // Check if the user is the owner
     if (role === "owner") {
       const owner = await userModel.findById({ _id: ownerId });
 
@@ -84,7 +84,7 @@ export const updateProperty = async (req, res) => {
     const id = req.params.id;
     const role = req.user.role;
 
-     // Check if the user is the owner
+    // Check if the user is the owner
     if (role === "owner") {
       const ownerId = req.user.id;
 
@@ -114,8 +114,8 @@ export const updateProperty = async (req, res) => {
 
       const updatedProperty = await propertyModel.findByIdAndUpdate(
         { _id: id },
-        { $set: req.body},
-        { new: true}
+        { $set: req.body },
+        { new: true }
       );
 
       if (!updatedProperty) {
@@ -148,7 +148,7 @@ export const deleteProperty = async (req, res) => {
     const id = req.params.id;
     const role = req.user.role;
 
-     // Check if the user is the owner
+    // Check if the user is the owner
     if (role === "owner") {
       const ownerId = req.user.id;
 
@@ -210,7 +210,7 @@ export const sendRequest = async (req, res) => {
     const id = req.params.id;
     const role = req.user.role;
 
-     // Check if the user is the renter
+    // Check if the user is the renter
     if (role === "renter") {
       const senderId = req.user.id;
 
@@ -223,7 +223,7 @@ export const sendRequest = async (req, res) => {
           .json({ status: 404, message: "The user sender request not found" });
       }
 
-       // Find the property by ID and populate owner information
+      // Find the property by ID and populate owner information
       const property = await propertyModel.findById(id).populate("owner");
 
       if (!property) {
@@ -245,7 +245,7 @@ export const sendRequest = async (req, res) => {
         });
       }
 
-       // Check if there is an existing request for this property and sender
+      // Check if there is an existing request for this property and sender
       const existingRequest = await requestModel.findOne({
         property: property._id,
         sender: senderId,
@@ -291,16 +291,22 @@ export const sendRequest = async (req, res) => {
 // Get Requests - GET
 export const getRequests = async (req, res) => {
   try {
-    const userId = req.user.id
-    const role = req.user.role
+    const userId = req.user.id;
+    const role = req.user.role;
 
-    const requests = await requestModel.find().sort({createdAt: -1}).populate([
-      { path: "sender", select: "name email avatar" },
-      {
-        path: "property",
-        populate: { path: "owner", select: "name email avatar" },
-      },
-    ]);
+    let requests = await requestModel
+      .find()
+      .sort({ createdAt: -1 })
+      .populate([
+        { path: "sender", select: "name email avatar" },
+        {
+          path: "property",
+          populate: { path: "owner", select: "name email avatar" },
+        },
+      ]);
+
+    // Filter non-deleted property requests
+    requests = requests.filter((request) => request.property);
 
     if (requests.length === 0) {
       return res
@@ -309,36 +315,40 @@ export const getRequests = async (req, res) => {
     }
 
     // Check if the user is the renter
-    if(role === "renter") {
+    if (role === "renter") {
+      const filteredRequests = requests.filter(
+        (request) => request.sender._id.toString() === userId
+      );
 
-      const filteredRequests = requests.filter(request => request.sender._id.toString() === userId)
-
-      if(filteredRequests.length === 0) {
+      if (filteredRequests.length === 0) {
         return res
-        .status(404)
-        .json({ status: 404, message: "Requests not found" });
+          .status(404)
+          .json({ status: 404, message: "Requests not found" });
       }
 
-      return res.status(200).json(filteredRequests)
+      return res.status(200).json(filteredRequests);
     } else {
+      const filteredRequests = requests.filter(
+        (request) => request.property.owner._id.toString() === userId
+      );
 
-      const filteredRequests = requests.filter(request => request.property.owner._id.toString() === userId)
-
-      if(filteredRequests.length === 0) {
+      if (filteredRequests.length === 0) {
         return res
-        .status(404)
-        .json({ status: 404, message: "Requests not found" });
+          .status(404)
+          .json({ status: 404, message: "Requests not found" });
       }
 
-      return res.status(200).json(filteredRequests)
+      return res.status(200).json(filteredRequests);
     }
-
   } catch (error) {
-    res.status(500).json({
-      status: 500,
-      message: "Internal Server Error",
-      error: error.message,
-    });
+    console.error("Error:", error);
+    res
+      .status(500)
+      .json({
+        status: 500,
+        message: "Internal Server Error",
+        error: error.message,
+      });
   }
 };
 
@@ -389,11 +399,16 @@ export const approveToRequest = async (req, res) => {
       // Update the property availability
       await propertyModel.findByIdAndUpdate(
         { _id: request.property._id },
-        { available: false }
+        { available: false },
+        { new: true }
       );
 
       // Update the request to mark it as approved
-      await requestModel.findByIdAndUpdate({ _id: id }, { isApproved: true });
+      await requestModel.findByIdAndUpdate(
+        { _id: id },
+        { isApproved: true },
+        { new: true }
+      );
 
       res.status(200).json({
         status: 200,
@@ -416,51 +431,63 @@ export const approveToRequest = async (req, res) => {
 // Get Transactions - GET
 export const getTransactions = async (req, res) => {
   try {
-    const userId = req.user.id
-    const role = req.user.role
+    const userId = req.user.id;
+    const role = req.user.role;
 
-    const transactions = await transactionModel.find().sort({ createdAt: -1 }).populate({
-      path: "request",
-      populate: [
-        { path: "sender", select: "name email avatar" },
-        {
-          path: "property",
-          populate: { path: "owner", select: "name email avatar" },
-        },
-      ],
-    });
+    let transactions = await transactionModel
+      .find()
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "request",
+        populate: [
+          { path: "sender", select: "name email avatar" },
+          {
+            path: "property",
+            populate: { path: "owner", select: "name email avatar" },
+          },
+        ],
+      });
+
+    // Filter transactions with non-deleted property requests
+    transactions = transactions.filter(
+      (transaction) => transaction.request && transaction.request.property
+    );
 
     if (transactions.length === 0) {
-      return res
-        .status(404)
-        .json({ status: 404, message: "Transactions not found" });
+      return res.status(404).json({
+        status: 404,
+        message: "Transactions not found",
+      });
     }
 
-     // Check if the user is the renter
-    if(role === "renter") {
+    // Check if the user is the renter
+    if (role === "renter") {
+      const filteredTransactions = transactions.filter(
+        (trns) => trns.request.sender._id.toString() === userId
+      );
 
-      const filteredTransactions = transactions.filter(trns => trns.request.sender._id.toString() === userId)
-
-      if(filteredTransactions.length === 0) {
-        return res
-        .status(404)
-        .json({ status: 404, message: "Transactions not found" });
+      if (filteredTransactions.length === 0) {
+        return res.status(404).json({
+          status: 404,
+          message: "Transactions not found",
+        });
       }
 
-      return res.status(200).json(filteredTransactions)
+      return res.status(200).json(filteredTransactions);
     } else {
+      const filteredTransactions = transactions.filter(
+        (trns) => trns.request.property.owner._id.toString() === userId
+      );
 
-      const filteredTransactions = transactions.filter(trns => trns.request.property.owner._id.toString() === userId)
-
-      if(filteredTransactions.length === 0) {
-        return res
-        .status(404)
-        .json({ status: 404, message: "Transactions not found" });
+      if (filteredTransactions.length === 0) {
+        return res.status(404).json({
+          status: 404,
+          message: "Transactions not found",
+        });
       }
 
-      return res.status(200).json(filteredTransactions)
+      return res.status(200).json(filteredTransactions);
     }
-
   } catch (error) {
     res.status(500).json({
       status: 500,
@@ -519,7 +546,8 @@ export const getMessage = async (req, res) => {
     const role = req.user.role;
 
     const messages = await messageModel
-      .find({ property: propertyId }).sort({ createdAt: -1 })
+      .find({ property: propertyId })
+      .sort({ createdAt: -1 })
       .populate([
         { path: "sender", select: "name email avatar" },
         {
@@ -527,7 +555,7 @@ export const getMessage = async (req, res) => {
           select: "title",
           populate: { path: "owner", select: "name email avatar" },
         },
-        { path: "replies"}
+        { path: "replies" },
       ]);
 
     if (messages.length === 0) {
@@ -536,7 +564,7 @@ export const getMessage = async (req, res) => {
         .json({ status: 404, message: "messages not found" });
     }
 
-     // Check if the user is the renter
+    // Check if the user is the renter
     if (role === "renter") {
       const filteredMessages = messages.filter(
         (msg) => msg.sender._id.toString() === userId
@@ -578,7 +606,7 @@ export const sendReply = async (req, res) => {
     const role = req.user.role;
     const id = req.params.id;
 
-     // Check if the user is the owner
+    // Check if the user is the owner
     if (role === "owner") {
       const { text } = req.body;
 
@@ -638,13 +666,16 @@ export const getReplies = async (req, res) => {
     const userId = req.user.id;
     const messageId = req.params.id;
 
-    const message = await messageModel.findById(messageId).sort({ createdAt: -1 }).populate({
-      path: "replies",
-      populate: {
-        path: "sender",
-        select: "name email avatar",
-      },
-    });
+    const message = await messageModel
+      .findById(messageId)
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "replies",
+        populate: {
+          path: "sender",
+          select: "name email avatar",
+        },
+      });
 
     if (!message) {
       return res

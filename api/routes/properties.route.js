@@ -15,7 +15,7 @@ import {
 } from "../controllers/properties.controller.js";
 import verifyToken from "../middleware/verifyToken.js";
 import validateProperty from "../middleware/ValidateProperty.js";
-import { contactOwner } from "../controllers/contact.controller.js";
+import { contactOwner, contactRenter } from "../controllers/contact.controller.js";
 
 const router = express.Router();
 
@@ -39,6 +39,9 @@ router.get("/transactions", verifyToken, getTransactions);
 
 // Contact Owner with Email - Route
 router.post("/contactOwner", contactOwner)
+
+// Contact Renter with Email - Route
+router.post("/contactRenter", contactRenter)
 
 // Send Message - Route
 router.post("/:id/send_message", verifyToken, sendMessage);
