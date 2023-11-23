@@ -11,6 +11,7 @@ import {
   sendMessage,
   sendReply,
   sendRequest,
+  updateImages,
   updateProperty,
 } from "../controllers/properties.controller.js";
 import verifyToken from "../middleware/verifyToken.js";
@@ -22,6 +23,7 @@ const router = express.Router();
 // Property routers
 router.get("/", getProperties);
 router.post("/create", verifyToken, validateProperty, createProperty);
+router.put("/update_images/:id", verifyToken, updateImages);
 router.put("/update/:id", verifyToken, validateProperty, updateProperty);
 router.delete("/delete/:id", verifyToken, deleteProperty);
 

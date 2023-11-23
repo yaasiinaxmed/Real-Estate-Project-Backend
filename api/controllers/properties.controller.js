@@ -78,6 +78,69 @@ export const createProperty = async (req, res) => {
   }
 };
 
+// Property Images Update - PUT
+export const updateImages = async (req, res) => {
+  try {
+    const id = req.params.id
+    const ownerId = req.user.id;
+    const role = req.user.role
+
+    if(role === 'renter') {
+      res.status(403).json({
+        status: 403,
+        message: "You don't have permission",
+      });
+    }
+
+    const owner = await userModel.findById({ _id: ownerId });
+
+    if (!owner) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "The owner not found" });
+    }
+
+    const property = await propertyModel.findById(id);
+
+    if (!property) {
+      return res.status(404).json({
+        status: 404,
+        message: "The Property not found",
+      });
+    }
+
+    if (property.owner.toString() !== ownerId) {
+      return res.status(403).json({
+        status: 403,
+        message: "You do not own this property!",
+      });
+    }
+
+    const updatedPropertyImages = await propertyModel.findByIdAndUpdate(
+      { _id: id },
+      { images: req.body},
+      { new: true }
+    );
+
+    if (!updatedPropertyImages) {
+      return res
+        .status(400)
+        .json({ status: 400, message: "Property images was not updated!" });
+    }
+
+    res
+      .status(200)
+      .json({ status: 200, message: "Property updated images successfully" });
+
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+}
+
 // Update Property - PUT
 export const updateProperty = async (req, res) => {
   try {
